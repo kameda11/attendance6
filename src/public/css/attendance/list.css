@@ -1,0 +1,193 @@
+.attendance-list-container {
+    margin: 0 auto;
+    padding: 20px 150px;
+    background-color: #F0EFF2;
+    min-height: 100vh;
+}
+
+.attendance-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+}
+
+.attendance-list-header h1 {
+    margin: 0;
+    color: #000000;
+    font-size: 1.5em;
+    border-left: 8px solid #000000;
+    padding-left: 10px;
+}
+
+.month-navigation {
+    margin-bottom: 30px;
+}
+
+.nav-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #737373;
+    background-color: #ffffff;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.nav-button {
+    color: #737373;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.current-date {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #737373;
+    flex: 1;
+    gap: 10px;
+}
+
+.current-date h2 {
+    margin: 10px;
+    color: #000000;
+    font-weight: bold;
+}
+
+.date-selector {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.month-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+}
+
+.month-input::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+.calendar-button {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.calendar-icon {
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
+.btn {
+    padding: 10px 20px;
+    font-weight: bold;
+    border: none;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-secondary {
+    background: #ffffff;
+    color: #737373;
+    text-decoration: none;
+}
+
+.arrow-left,
+.arrow-right {
+    width: 20px;
+    height: 20px;
+    color: #737373;
+}
+
+.attendance-main {
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 50px;
+}
+
+.attendance-table {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+th {
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    color: #737373;
+    border-bottom: 3px solid #E1E1E1;
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 2px solid #E1E1E1;
+    color: #737373;
+}
+
+td a {
+    color: #000000;
+    text-decoration: none;
+}
+
+.action-button {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    color: #737373;
+}
+
+.action-button.detail {
+    color: #000000;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-align: center;
+    min-width: 60px;
+}
+
+.pending-request {
+    background-color: #fff3cd;
+}
+
+.pending-badge {
+    background-color: #ffc107;
+    color: #000;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    margin-left: 5px;
+}

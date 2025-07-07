@@ -1,0 +1,132 @@
+.attendance-detail-container {
+    padding: 20px 150px;
+    background-color: #F0EFF2;
+    min-height: 100vh;
+}
+
+.attendance-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+}
+
+.attendance-detail-header h1 {
+    margin: 0;
+    color: #000000;
+    font-size: 1.5em;
+    border-left: 8px solid #000000;
+    padding-left: 10px;
+}
+
+.attendance-detail-table {
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #E1E1E1;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    padding: 20px 50px;
+    text-align: left;
+    font-weight: bold;
+    color: #737373;
+    border-bottom: 2px solid #E1E1E1;
+    width: 40%;
+}
+
+td {
+    padding: 20px;
+    border-bottom: 2px solid #E1E1E1;
+    color: #000000;
+    font-weight: bold;
+}
+
+tr:last-child th,
+tr:last-child td {
+    border-bottom: none;
+}
+
+.time-inputs {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.time-input {
+    display: flex;
+    align-items: center;
+}
+
+.time-input input[type="text"] {
+    padding: 5px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 80px;
+    text-align: center;
+}
+
+.time-inputs label {
+    font-weight: bold;
+    color: #333;
+    font-size: 16px;
+    margin: 0 10px;
+}
+
+.status-select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 120px;
+}
+
+.notes-textbox {
+    padding: 5px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 400px;
+    resize: vertical;
+    font-family: inherit;   
+}
+
+.attendance-detail-actions {
+    display: flex;
+    justify-content: right;
+    margin-top: 30px;
+    padding: 20px;
+}
+
+.btn-primary {
+    background: #000000;
+    color: #FFFFFF;
+    padding: 8px 40px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+}
+
+.date-section {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.date-year-section {
+    margin-right: 40px;
+}
+
+.date-month-day-section {
+    display: flex;
+    align-items: center;
+}

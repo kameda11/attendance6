@@ -1,0 +1,155 @@
+.attendance-container {
+    margin-left: auto;
+    margin-right: auto;
+    font-family: 'Inter', sans-serif;
+    background-color: #F0EFF2;
+    min-height: 100vh;
+    padding: 20px 150px;
+}
+
+.attendance-status {
+    background: #C8C8C8;
+    border-radius: 50px;
+    padding: 5px;
+    margin-bottom: 30px;
+    text-align: center;
+    max-width: 100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.status-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #696969;
+}
+
+.status-label {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #555;
+}
+
+.status-value {
+    font-weight: bold;
+    border-radius: 20px;
+    text-align: center;
+}
+
+.status-value.working {
+    background-color: #000000;
+    color: #FFFFFF;
+}
+
+.status-value.break {
+    background: #FFFFFF;
+    color: #000000;
+}
+
+.status-value.not-working {
+    background: #000000;
+    color: #FFFFFF;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+    text-align: center;
+    min-width: 80px;
+}
+
+.attendance-info {
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.date-time-info {
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.date-display,
+.time-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.date-display {
+    font-size: 40px;
+}
+
+.time-display {
+    font-weight: 700;
+    font-size: 80px;
+}
+
+.label {
+    font-size: 1em;
+    color: #666;
+    font-weight: 500;
+}
+
+.attendance-times p {
+    margin: 5px 0;
+    color: #000000;
+    font-weight: bold;
+}
+
+.attendance-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+    justify-content: center;
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn {
+    padding: 10px 20px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 20px;
+    min-width: 120px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background: #000000;
+    color: #FFFFFF;
+}
+
+.btn-warning {
+    background: #000000;
+    color: #FFFFFF;
+}
+
+.btn-info {
+    background: #FFFFFF;
+    color: #000000;
+}
+
+.btn-success {
+    background: #FFFFFF;
+    color: #000000;
+}
+
+.btn-secondary {
+    background: #FFFFFF;
+    color: #000000;
+}

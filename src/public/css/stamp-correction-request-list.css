@@ -1,0 +1,135 @@
+/* stamp-correction-request-list.css */
+
+.admin-requests-container {
+    margin: 0 auto;
+    padding: 20px 150px;
+    background-color: #F0EFF2;
+    min-height: 100vh;
+}
+
+.header-content {
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.header-content h1 {
+    color: #000000;
+    font-weight: bold;
+    margin: 0;
+    border-left: 8px solid #000000;
+    padding-left: 10px;
+    font-size: 1.5em;
+}
+
+.tab-container {
+    margin-bottom: 20px;
+}
+
+.tab-buttons {
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #000000;
+}
+
+.tab-button {
+    padding: 12px 24px;
+    color: #000000;
+    font-size: 1rem;
+    min-width: 150px;
+    border: none;
+}
+
+.tab-button.active {
+    color: #000000;
+    font-weight: bold;
+}
+
+.requests-main {
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.requests-table {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.requests-table table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+}
+
+.requests-table thead {
+    background-color: #FFFFFF;
+}
+
+.requests-table th {
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: bold;
+    color: #737373;
+    border-bottom: 3px solid #E1E1E1;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.requests-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e9ecef;
+    text-align: left;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #737373;
+}
+
+.status-cell {
+    text-align: left;
+}
+
+.status-badge {
+    display: inline-block;
+    font-weight: bold;
+    min-width: 80px;
+    color: #737373;
+}
+
+.target-date {
+    color: #737373;
+}
+
+.request-reason {
+    max-width: 200px;
+    word-wrap: break-word;
+    color: #737373;
+}
+
+.no-reason {
+    color: #737373;
+    font-style: italic;
+}
+
+.action-button {
+    display: inline-block;
+    text-decoration: none;
+    font-weight: bold;
+    border: none;
+}
+
+.action-button.detail {
+    color: #000000;
+}
+
+.action-button.detail.disabled {
+    color: #737373;
+    cursor: not-allowed;
+}
+
+.no-requests {
+    text-align: center;
+    color: #737373;
+    padding: 40px 20px;
+}

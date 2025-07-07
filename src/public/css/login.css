@@ -1,0 +1,32 @@
+.login-body {
+    background-color: #ffffff;
+    min-height: 100vh;
+}
+
+.login-main {
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 80px);
+    padding: 30px 15px;
+}
+
+.admin-login-body {
+    background-color: #ffffff;
+    min-height: 100vh;
+}
+
+.admin-login-header {
+    background-color: #000000;
+}
+
+.admin-login-header .header__logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-login-main {
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 80px);
+}

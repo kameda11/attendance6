@@ -1,0 +1,109 @@
+.admin-users-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 50px;
+    width: 80%;
+    background-color: #F0EFF2;
+}
+
+.header-content {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.header-content h1 {
+    color: #000000;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    padding-left: 10px;
+    border-left: 4px solid #000000;
+    text-align: left;
+}
+
+.users-main {
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.users-table {
+    width: 100%;
+}
+
+.users-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+}
+
+.users-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.users-table thead {
+    background: #ffffff;
+}
+
+.users-table th {
+    padding: 10px 0px 10px 0px;
+    text-align: center;
+    font-weight: bold;
+    color: #737373;
+    border-bottom: 3px solid #E1E1E1;
+    font-size: 16px;
+}
+
+.users-table th:first-child {
+    padding-left: 100px;
+}
+
+.users-table th:last-child {
+    padding-right: 100px;
+}
+
+.users-table td {
+    border-bottom: 2px solid #E1E1E1;
+    vertical-align: middle;
+    text-align: center;
+    font-weight: bold;
+}
+
+.user-name {
+    font-weight: bold;
+    color: #737373;
+}
+
+.user-info {
+    align-items: center;
+    gap: 10px;
+    padding-left: 100px;
+}
+
+.user-info .name {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.user-email {
+    color: #737373;
+    font-size: 16px;
+}
+
+.action-button {
+    display: inline-block;
+    padding: 8px 100px 8px 0px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 16px;
+    border: none;
+    color: #000000;
+}
+
+.no-users {
+    text-align: center;
+    color: #737373;
+    padding: 20px 20px;
+    font-size: 16px;
+}

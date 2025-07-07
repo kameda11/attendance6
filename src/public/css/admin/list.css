@@ -1,0 +1,176 @@
+.admin-attendances-container {
+    margin: 0 auto;
+    padding: 20px 150px;
+    background-color: #F0EFF2;
+    min-height: 100vh;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+}
+
+.header-content h1 {
+    margin: 0;
+    color: #000000;
+    font-size: 1.5em;
+    border-left: 8px solid #000000;
+    padding-left: 10px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.date-navigation {
+    margin-bottom: 30px;
+}
+
+.nav-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #737373;
+    background-color: #ffffff;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.nav-button {
+    color: #737373;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.current-date {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #737373;
+    flex: 1;
+    gap: 10px;
+    font-weight: bold;
+}
+
+.current-date h2 {
+    margin: 10px;
+    color: #000000;
+    font-weight: bold;
+}
+
+.date-selector {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.month-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+}
+
+.month-input::-webkit-calendar-picker-indicator {
+    display: none;
+}
+
+.calendar-button {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.calendar-icon {
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+
+.btn-secondary {
+    background: #ffffff;
+    color: #737373;
+    text-decoration: none;
+}
+
+.arrow-left,
+.arrow-right {
+    width: 20px;
+    height: 20px;
+    color: #737373;
+}
+
+
+.attendances-main {
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 50px;
+}
+
+.attendances-table {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+th {
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    color: #737373;
+    border-bottom: 3px solid #E1E1E1;
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 2px solid #E1E1E1;
+    color: #737373;
+    font-weight: bold;
+}
+
+.action-button {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    color: #737373;
+}
+
+.action-button.detail {
+    color: #000000;
+}
+
+.csv-button {
+    display: inline-block;
+    padding: 10px 40px;
+    background-color: #000000;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-left: auto;
+    margin-top: 40px;
+}
