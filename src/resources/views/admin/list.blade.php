@@ -21,7 +21,7 @@
                 <div class="date-selector">
                     <input type="month" id="monthSelector" value="{{ $currentMonth->format('Y-m') }}" class="month-input">
                     <label for="monthSelector" class="calendar-button">
-                        <img src="{{ asset('storage/app/public/calendar.png') }}" alt="カレンダー" class="calendar-icon">
+                        <img src="{{ asset('storage/calendar.png') }}" alt="カレンダー" class="calendar-icon">
                     </label>
                 </div>
                 <h2>{{ $currentMonth->format('Y/m') }}</h2>

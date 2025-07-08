@@ -29,7 +29,7 @@ class Attendance extends Model
 
     public function attendanceRequests()
     {
-        return $this->hasMany(AttendanceRequest::class);
+        return $this->hasMany(\App\Models\AttendanceRequest::class);
     }
 
     public function breaks()

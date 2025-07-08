@@ -20,7 +20,7 @@
                 <div class="date-selector">
                     <input type="month" id="monthSelector" value="{{ $currentMonth->format('Y-m') }}" class="month-input">
                     <label for="monthSelector" class="calendar-button">
-                        <img src="{{ asset('storage/app/public/calendar.png') }}" alt="カレンダー" class="calendar-icon">
+                        <img src="{{ asset('storage/calendar.png') }}" alt="カレンダー" class="calendar-icon">
                     </label>
                 </div>
                 <h2>{{ $currentMonth->format('Y/m') }}</h2>
@@ -91,19 +91,19 @@
 
 @section('script')
 <script>
-document.getElementById('monthSelector').addEventListener('change', function() {
-    const selectedMonth = this.value;
-    const [year, month] = selectedMonth.split('-');
-    const currentUrl = new URL(window.location);
-    currentUrl.searchParams.set('year', year);
-    currentUrl.searchParams.set('month', month);
-    window.location.href = currentUrl.toString();
-});
+    document.getElementById('monthSelector').addEventListener('change', function() {
+        const selectedMonth = this.value;
+        const [year, month] = selectedMonth.split('-');
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('year', year);
+        currentUrl.searchParams.set('month', month);
+        window.location.href = currentUrl.toString();
+    });
 
-// カレンダーアイコンをクリックしたときにmonth pickerを開く
-document.querySelector('.calendar-button').addEventListener('click', function(e) {
-    e.preventDefault();
-    document.getElementById('monthSelector').showPicker();
-});
+    // カレンダーアイコンをクリックしたときにmonth pickerを開く
+    document.querySelector('.calendar-button').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('monthSelector').showPicker();
+    });
 </script>
 @endsection

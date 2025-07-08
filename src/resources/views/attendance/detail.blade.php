@@ -15,6 +15,9 @@
 
         @if(!$attendance)
         <input type="hidden" name="date" value="{{ $date }}">
+        @error('date')
+        <span class="error-message">{{ $message }}</span>
+        @enderror
         @endif
 
         <div class="attendance-detail-table">
@@ -57,11 +60,17 @@
                             @else
                             <div class="time-inputs">
                                 <div class="time-input">
-                                    <input type="text" name="clock_in_time" pattern="[0-9]{1,2}:[0-9]{2}" maxlength="5" value="{{ old('clock_in_time', $displayData['clockInTime']) }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="clock_in_time" maxlength="5" value="{{ old('clock_in_time', $displayData['clockInTime']) }}" inputmode="numeric" autocomplete="off">
+                                    @error('clock_in_time')
+                                    <span class="error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
                                 <label>～</label>
                                 <div class="time-input">
-                                    <input type="text" name="clock_out_time" pattern="[0-9]{1,2}:[0-9]{2}" maxlength="5" value="{{ old('clock_out_time', $displayData['clockOutTime']) }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="clock_out_time" maxlength="5" value="{{ old('clock_out_time', $displayData['clockOutTime']) }}" inputmode="numeric" autocomplete="off">
+                                    @error('clock_out_time')
+                                    <span class="error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
                             @endif
@@ -84,11 +93,17 @@
                             @else
                             <div class="time-inputs">
                                 <div class="time-input">
-                                    <input type="text" name="break1_start_time" pattern="[0-9]{1,2}:[0-9]{2}" maxlength="5" value="{{ old('break1_start_time', $displayData['break1StartTime']) }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break1_start_time" maxlength="5" value="{{ old('break1_start_time', $displayData['break1StartTime']) }}" inputmode="numeric" autocomplete="off">
+                                    @error('break1_start_time')
+                                    <span class="error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
                                 <label>～</label>
                                 <div class="time-input">
-                                    <input type="text" name="break1_end_time" pattern="[0-9]{1,2}:[0-9]{2}" maxlength="5" value="{{ old('break1_end_time', $displayData['break1EndTime']) }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break1_end_time" maxlength="5" value="{{ old('break1_end_time', $displayData['break1EndTime']) }}" inputmode="numeric" autocomplete="off">
+                                    @error('break1_end_time')
+                                    <span class="error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
                             @endif
@@ -111,11 +126,17 @@
                             @else
                             <div class="time-inputs">
                                 <div class="time-input">
-                                    <input type="text" name="break2_start_time" pattern="[0-9]{1,2}:[0-9]{2}" maxlength="5" value="{{ old('break2_start_time', $displayData['break2StartTime']) }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break2_start_time" maxlength="5" value="{{ old('break2_start_time', $displayData['break2StartTime']) }}" inputmode="numeric" autocomplete="off">
+                                    @error('break2_start_time')
+                                    <span class="error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
                                 <label>～</label>
                                 <div class="time-input">
-                                    <input type="text" name="break2_end_time" pattern="[0-9]{1,2}:[0-9]{2}" maxlength="5" value="{{ old('break2_end_time', $displayData['break2EndTime']) }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break2_end_time" maxlength="5" value="{{ old('break2_end_time', $displayData['break2EndTime']) }}" inputmode="numeric" autocomplete="off">
+                                    @error('break2_end_time')
+                                    <span class="error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
                             @endif
@@ -129,7 +150,10 @@
                                 {{ $displayData['notes'] }}
                             </div>
                             @else
-                            <textarea name="notes" class="notes-textarea" rows="4" cols="50" required>{{ old('notes', $displayData['notes']) }}</textarea>
+                            <textarea name="notes" class="notes-textarea" rows="4" cols="50">{{ old('notes', $displayData['notes']) }}</textarea>
+                            @error('notes')
+                            <span class="error-message">{{ $message }}</span>
+                            @enderror
                             @endif
                         </td>
                     </tr>

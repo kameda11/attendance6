@@ -14,7 +14,7 @@ use App\Models\Breaktime;
 use App\Models\BreakRequest;
 use Carbon\Carbon;
 use App\Http\Requests\AdminLoginRequest;
-use App\Http\Requests\AttendanceRequest;
+use App\Http\Requests\AttendanceFormRequest;
 
 class AdminController extends Controller
 {
@@ -308,7 +308,7 @@ class AdminController extends Controller
     /**
      * 勤怠更新処理
      */
-    public function attendanceUpdate(AttendanceRequest $request, $id)
+    public function attendanceUpdate(AttendanceFormRequest $request, $id)
     {
         $attendance = Attendance::findOrFail($id);
 
@@ -351,7 +351,7 @@ class AdminController extends Controller
     /**
      * 勤怠新規作成処理
      */
-    public function attendanceStore(AttendanceRequest $request)
+    public function attendanceStore(AttendanceFormRequest $request)
     {
         $validated = $request->validated();
 

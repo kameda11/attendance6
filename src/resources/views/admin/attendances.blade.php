@@ -4,6 +4,22 @@
 <link rel="stylesheet" href="{{ asset('css/admin/attendances.css') }}">
 
 <div class="admin-attendances-container">
+    @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
+
+    @if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+    @endif
+
     <div class="header-content">
         <h1>{{ $selectedDate->format('Y年m月d日') }}の勤怠</h1>
     </div>
@@ -21,7 +37,7 @@
                 <div class="date-selector">
                     <input type="date" id="dateSelector" value="{{ $selectedDate->format('Y-m-d') }}" class="date-input">
                     <label for="dateSelector" class="calendar-button">
-                        <img src="{{ asset('storage/app/public/calendar.png') }}" alt="カレンダー" class="calendar-icon">
+                        <img src="{{ asset('storage/calendar.png') }}" alt="カレンダー" class="calendar-icon">
                     </label>
                 </div>
                 <h2>{{ $selectedDate->format('Y/m/d') }}</h2>

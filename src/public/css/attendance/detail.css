@@ -251,3 +251,9 @@ tr:last-child td {
     min-width: 80px;
     color: #737373;
 }
+
+.error-message {
+    color: #ff0000;
+    font-size: 14px;
+    margin-top: 5px;
+}

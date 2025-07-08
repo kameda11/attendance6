@@ -56,11 +56,17 @@
                         <td>
                             <div class="time-inputs">
                                 <div class="time-input">
-                                    <input type="text" name="clock_in_time" pattern="[0-9]{1,2}:[0-9]{2}" maxlength="5" value="{{ old('clock_in_time', $attendanceRequest && $attendanceRequest->clock_in_time ? $attendanceRequest->clock_in_time->format('H:i') : ($attendance && $attendance->clock_in_time ? $attendance->clock_in_time->format('H:i') : '')) }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="clock_in_time" maxlength="5" value="{{ old('clock_in_time', $attendanceRequest && $attendanceRequest->clock_in_time ? $attendanceRequest->clock_in_time->format('H:i') : ($attendance && $attendance->clock_in_time ? $attendance->clock_in_time->format('H:i') : '')) }}" inputmode="numeric" autocomplete="off">
+                                    @error('clock_in_time')
+                                    <span class="error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
                                 <label>～</label>
                                 <div class="time-input">
-                                    <input type="text" name="clock_out_time" pattern="[0-9]{1,2}:[0-9]{2}" maxlength="5" value="{{ old('clock_out_time', $attendanceRequest && $attendanceRequest->clock_out_time ? $attendanceRequest->clock_out_time->format('H:i') : ($attendance && $attendance->clock_out_time ? $attendance->clock_out_time->format('H:i') : '')) }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="clock_out_time" maxlength="5" value="{{ old('clock_out_time', $attendanceRequest && $attendanceRequest->clock_out_time ? $attendanceRequest->clock_out_time->format('H:i') : ($attendance && $attendance->clock_out_time ? $attendance->clock_out_time->format('H:i') : '')) }}" inputmode="numeric" autocomplete="off">
+                                    @error('clock_out_time')
+                                    <span class="error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
                         </td>
@@ -89,11 +95,17 @@
                             @else
                             <div class="time-inputs">
                                 <div class="time-input">
-                                    <input type="text" name="break1_start_time" pattern="[0-9]{1,2}:[0-9]{2}" maxlength="5" value="{{ old('break1_start_time') }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break1_start_time" maxlength="5" value="{{ old('break1_start_time') }}" inputmode="numeric" autocomplete="off">
+                                    @error('break1_start_time')
+                                    <span class="error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
                                 <label>～</label>
                                 <div class="time-input">
-                                    <input type="text" name="break1_end_time" pattern="[0-9]{1,2}:[0-9]{2}" maxlength="5" value="{{ old('break1_end_time') }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break1_end_time" maxlength="5" value="{{ old('break1_end_time') }}" inputmode="numeric" autocomplete="off">
+                                    @error('break1_end_time')
+                                    <span class="error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
                             @endif
@@ -123,11 +135,17 @@
                             @else
                             <div class="time-inputs">
                                 <div class="time-input">
-                                    <input type="text" name="break2_start_time" pattern="[0-9]{1,2}:[0-9]{2}" maxlength="5" value="{{ old('break2_start_time') }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break2_start_time" maxlength="5" value="{{ old('break2_start_time') }}" inputmode="numeric" autocomplete="off">
+                                    @error('break2_start_time')
+                                    <span class="error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
                                 <label>～</label>
                                 <div class="time-input">
-                                    <input type="text" name="break2_end_time" pattern="[0-9]{1,2}:[0-9]{2}" maxlength="5" value="{{ old('break2_end_time') }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break2_end_time" maxlength="5" value="{{ old('break2_end_time') }}" inputmode="numeric" autocomplete="off">
+                                    @error('break2_end_time')
+                                    <span class="error-message">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
                             @endif
@@ -136,7 +154,10 @@
                     <tr>
                         <th>備考</th>
                         <td>
-                            <textarea name="notes" class="notes-textbox" rows="4" cols="50" required>{{ old('notes', $attendanceRequest && $attendanceRequest->notes ? $attendanceRequest->notes : ($attendance ? ($attendance->notes ?? '') : '')) }}</textarea>
+                            <textarea name="notes" class="notes-textbox" rows="4" cols="50">{{ old('notes', $attendanceRequest && $attendanceRequest->notes ? $attendanceRequest->notes : ($attendance ? ($attendance->notes ?? '') : '')) }}</textarea>
+                            @error('notes')
+                            <span class="error-message">{{ $message }}</span>
+                            @enderror
                         </td>
                     </tr>
                 </tbody>

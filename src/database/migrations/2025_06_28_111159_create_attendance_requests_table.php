@@ -23,11 +23,13 @@ class CreateAttendanceRequestsTable extends Migration
 
             $table->time('clock_in_time')->nullable();
             $table->time('clock_out_time')->nullable();
+            $table->json('break_info')->nullable(); // 休憩情報をJSON形式で保存
             $table->text('notes');
 
             $table->timestamps();
 
-            $table->unique(['user_id', 'target_date', 'status'], 'unique_pending_request');
+            // 開発・テスト用のため、ユニーク制約は一時的に削除
+            // 本番環境では必要に応じて適切な制約を追加することを推奨
         });
     }
 

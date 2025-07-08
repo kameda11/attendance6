@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Attendance;
 use App\Models\BreakRequest;
 use App\Models\AttendanceRequest as AttendanceRequestModel;
-use App\Http\Requests\AttendanceRequest;
+use App\Http\Requests\AttendanceFormRequest;
 
 class UserController extends Controller
 {
@@ -435,7 +436,7 @@ class UserController extends Controller
         if ($hasPendingRequest) {
             if ($attendance) {
                 // 既存の勤怠記録の場合
-                $pendingAttendanceRequest = AttendanceRequest::where('attendance_id', $attendance->id)
+                $pendingAttendanceRequest = AttendanceRequestModel::where('attendance_id', $attendance->id)
                     ->where('status', 'pending')
                     ->first();
                 $pendingBreakRequests = BreakRequest::where('attendance_id', $attendance->id)
@@ -444,7 +445,7 @@ class UserController extends Controller
             } else {
                 // 新規作成の場合
                 $targetDate = $date ?? now()->format('Y-m-d');
-                $pendingAttendanceRequest = AttendanceRequest::where('user_id', $user->id)
+                $pendingAttendanceRequest = AttendanceRequestModel::where('user_id', $user->id)
                     ->where('target_date', $targetDate)
                     ->where('status', 'pending')
                     ->first();
@@ -570,7 +571,7 @@ class UserController extends Controller
     {
         if ($attendance) {
             // 既存の勤怠記録の場合、その勤怠IDに対する保留中の申請をチェック
-            $hasAttendanceRequest = AttendanceRequest::where('attendance_id', $attendance->id)
+            $hasAttendanceRequest = AttendanceRequestModel::where('attendance_id', $attendance->id)
                 ->where('status', 'pending')
                 ->exists();
             $hasBreakRequest = BreakRequest::where('attendance_id', $attendance->id)
@@ -580,7 +581,7 @@ class UserController extends Controller
         } else {
             // 新規作成の場合、その日付に対する保留中の申請をチェック
             $targetDate = $date ?? now()->format('Y-m-d');
-            $hasAttendanceRequest = AttendanceRequest::where('user_id', $user->id)
+            $hasAttendanceRequest = AttendanceRequestModel::where('user_id', $user->id)
                 ->where('target_date', $targetDate)
                 ->where('status', 'pending')
                 ->exists();
@@ -595,7 +596,7 @@ class UserController extends Controller
     /**
      * 勤怠修正申請を作成
      */
-    public function attendanceUpdate(AttendanceRequest $request, $id)
+    public function attendanceUpdate(AttendanceFormRequest $request, $id)
     {
         /** @var User $user */
         $user = Auth::user();
@@ -636,7 +637,7 @@ class UserController extends Controller
             }
 
             // 勤怠申請を作成
-            $attendanceRequest = AttendanceRequest::create($requestData);
+            $attendanceRequest = AttendanceRequestModel::create($requestData);
 
             // 休憩時間の申請処理
             $this->processBreakRequests($user, $attendance, $request);
@@ -713,7 +714,7 @@ class UserController extends Controller
     /**
      * 勤怠新規作成申請を作成
      */
-    public function attendanceStore(AttendanceRequest $request)
+    public function attendanceStore(AttendanceFormRequest $request)
     {
         /** @var User $user */
         $user = Auth::user();
@@ -781,7 +782,7 @@ class UserController extends Controller
         }
 
         // 勤怠申請を作成
-        $attendanceRequest = AttendanceRequest::create($requestData);
+        $attendanceRequest = AttendanceRequestModel::create($requestData);
 
         return redirect()->route('user.attendance.list')->with('success', '新規作成申請を送信しました。承認をお待ちください。');
     }
