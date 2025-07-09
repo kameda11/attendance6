@@ -59,10 +59,14 @@ class AttendanceFormRequest extends FormRequest
 
         // 両方の時間が入力されている場合のみチェック
         if ($clockInTime && $clockOutTime) {
-            $inTime = \Carbon\Carbon::createFromFormat('H:i', $clockInTime);
-            $outTime = \Carbon\Carbon::createFromFormat('H:i', $clockOutTime);
+            try {
+                $inTime = \Carbon\Carbon::createFromFormat('H:i', $clockInTime);
+                $outTime = \Carbon\Carbon::createFromFormat('H:i', $clockOutTime);
 
-            if ($inTime->greaterThanOrEqualTo($outTime)) {
+                if ($inTime->greaterThanOrEqualTo($outTime)) {
+                    $validator->errors()->add('clock_in_time', '出勤時間もしくは退勤時間が不適切な値です');
+                }
+            } catch (\Exception $e) {
                 $validator->errors()->add('clock_in_time', '出勤時間もしくは退勤時間が不適切な値です');
             }
         }
@@ -86,29 +90,57 @@ class AttendanceFormRequest extends FormRequest
             return;
         }
 
-        $outTime = \Carbon\Carbon::createFromFormat('H:i', $clockOutTime);
+        try {
+            $outTime = \Carbon\Carbon::createFromFormat('H:i', $clockOutTime);
+        } catch (\Exception $e) {
+            $validator->errors()->add('clock_out_time', '休憩時間が不適切な値です');
+            return;
+        }
 
         // 休憩1のチェック
         $break1Start = $this->input('break1_start_time');
         $break1End = $this->input('break1_end_time');
 
         if ($break1Start && $break1End) {
-            $break1StartTime = \Carbon\Carbon::createFromFormat('H:i', $break1Start);
-            $break1EndTime = \Carbon\Carbon::createFromFormat('H:i', $break1End);
+            try {
+                $break1StartTime = \Carbon\Carbon::createFromFormat('H:i', $break1Start);
+                $break1EndTime = \Carbon\Carbon::createFromFormat('H:i', $break1End);
 
-            // 休憩開始時間が休憩終了時間より後または同じ
-            if ($break1StartTime->greaterThanOrEqualTo($break1EndTime)) {
-                $validator->errors()->add('break1_start_time', '休憩開始時間もしくは休憩終了時間が不適切な値です');
-            }
+                // 休憩開始時間が休憩終了時間より後または同じ
+                if ($break1StartTime->greaterThanOrEqualTo($break1EndTime)) {
+                    $validator->errors()->add('break1_start_time', '休憩時間が不適切な値です');
+                }
 
-            // 休憩終了時間が退勤時間より後または同じ
-            if ($break1EndTime->greaterThanOrEqualTo($outTime)) {
+                // 休憩開始時間が退勤時間より後または同じ
+                if ($break1StartTime->greaterThanOrEqualTo($outTime)) {
+                    $validator->errors()->add('break1_start_time', '休憩時間が不適切な値です');
+                }
+
+                // 休憩終了時間が退勤時間より後または同じ
+                if ($break1EndTime->greaterThanOrEqualTo($outTime)) {
+                    $validator->errors()->add('break1_end_time', '休憩終了時間もしくは退勤時間が不適切な値です');
+                }
+            } catch (\Exception $e) {
                 $validator->errors()->add('break1_end_time', '休憩終了時間もしくは退勤時間が不適切な値です');
+            }
+        } elseif ($break1Start) {
+            // 休憩開始時間のみ入力されている場合
+            try {
+                $break1StartTime = \Carbon\Carbon::createFromFormat('H:i', $break1Start);
+                if ($break1StartTime->greaterThanOrEqualTo($outTime)) {
+                    $validator->errors()->add('break1_start_time', '休憩時間が不適切な値です');
+                }
+            } catch (\Exception $e) {
+                $validator->errors()->add('break1_start_time', '休憩時間が不適切な値です');
             }
         } elseif ($break1End) {
             // 休憩終了時間のみ入力されている場合
-            $break1EndTime = \Carbon\Carbon::createFromFormat('H:i', $break1End);
-            if ($break1EndTime->greaterThanOrEqualTo($outTime)) {
+            try {
+                $break1EndTime = \Carbon\Carbon::createFromFormat('H:i', $break1End);
+                if ($break1EndTime->greaterThanOrEqualTo($outTime)) {
+                    $validator->errors()->add('break1_end_time', '休憩終了時間もしくは退勤時間が不適切な値です');
+                }
+            } catch (\Exception $e) {
                 $validator->errors()->add('break1_end_time', '休憩終了時間もしくは退勤時間が不適切な値です');
             }
         }
@@ -118,22 +150,45 @@ class AttendanceFormRequest extends FormRequest
         $break2End = $this->input('break2_end_time');
 
         if ($break2Start && $break2End) {
-            $break2StartTime = \Carbon\Carbon::createFromFormat('H:i', $break2Start);
-            $break2EndTime = \Carbon\Carbon::createFromFormat('H:i', $break2End);
+            try {
+                $break2StartTime = \Carbon\Carbon::createFromFormat('H:i', $break2Start);
+                $break2EndTime = \Carbon\Carbon::createFromFormat('H:i', $break2End);
 
-            // 休憩開始時間が休憩終了時間より後または同じ
-            if ($break2StartTime->greaterThanOrEqualTo($break2EndTime)) {
-                $validator->errors()->add('break2_start_time', '休憩開始時間もしくは休憩終了時間が不適切な値です');
-            }
+                // 休憩開始時間が休憩終了時間より後または同じ
+                if ($break2StartTime->greaterThanOrEqualTo($break2EndTime)) {
+                    $validator->errors()->add('break2_start_time', '休憩時間が不適切な値です');
+                }
 
-            // 休憩終了時間が退勤時間より後または同じ
-            if ($break2EndTime->greaterThanOrEqualTo($outTime)) {
+                // 休憩開始時間が退勤時間より後または同じ
+                if ($break2StartTime->greaterThanOrEqualTo($outTime)) {
+                    $validator->errors()->add('break2_start_time', '休憩時間が不適切な値です');
+                }
+
+                // 休憩終了時間が退勤時間より後または同じ
+                if ($break2EndTime->greaterThanOrEqualTo($outTime)) {
+                    $validator->errors()->add('break2_end_time', '休憩終了時間もしくは退勤時間が不適切な値です');
+                }
+            } catch (\Exception $e) {
                 $validator->errors()->add('break2_end_time', '休憩終了時間もしくは退勤時間が不適切な値です');
+            }
+        } elseif ($break2Start) {
+            // 休憩開始時間のみ入力されている場合
+            try {
+                $break2StartTime = \Carbon\Carbon::createFromFormat('H:i', $break2Start);
+                if ($break2StartTime->greaterThanOrEqualTo($outTime)) {
+                    $validator->errors()->add('break2_start_time', '休憩時間が不適切な値です');
+                }
+            } catch (\Exception $e) {
+                $validator->errors()->add('break2_start_time', '休憩時間が不適切な値です');
             }
         } elseif ($break2End) {
             // 休憩終了時間のみ入力されている場合
-            $break2EndTime = \Carbon\Carbon::createFromFormat('H:i', $break2End);
-            if ($break2EndTime->greaterThanOrEqualTo($outTime)) {
+            try {
+                $break2EndTime = \Carbon\Carbon::createFromFormat('H:i', $break2End);
+                if ($break2EndTime->greaterThanOrEqualTo($outTime)) {
+                    $validator->errors()->add('break2_end_time', '休憩終了時間もしくは退勤時間が不適切な値です');
+                }
+            } catch (\Exception $e) {
                 $validator->errors()->add('break2_end_time', '休憩終了時間もしくは退勤時間が不適切な値です');
             }
         }
@@ -147,12 +202,12 @@ class AttendanceFormRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'clock_in_time.regex' => 'HH:MM 形式で入力してください',
-            'clock_out_time.regex' => 'HH:MM 形式で入力してください',
-            'break1_start_time.regex' => 'HH:MM 形式で入力してください',
-            'break1_end_time.regex' => 'HH:MM 形式で入力してください',
-            'break2_start_time.regex' => 'HH:MM 形式で入力してください',
-            'break2_end_time.regex' => 'HH:MM 形式で入力してください',
+            'clock_in_time.regex' => '出勤時間もしくは退勤時間が不適切な値です',
+            'clock_out_time.regex' => '出勤時間もしくは退勤時間が不適切な値です',
+            'break1_start_time.regex' => '休憩終了時間もしくは退勤時間が不適切な値です',
+            'break1_end_time.regex' => '休憩終了時間もしくは退勤時間が不適切な値です',
+            'break2_start_time.regex' => '休憩終了時間もしくは退勤時間が不適切な値です',
+            'break2_end_time.regex' => '休憩終了時間もしくは退勤時間が不適切な値です',
             'date.required' => '日付を入力してください',
             'date.date' => '有効な日付を入力してください',
             'notes.required' => '備考を記入してください',
