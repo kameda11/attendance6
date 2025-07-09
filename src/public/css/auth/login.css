@@ -63,3 +63,53 @@
     text-decoration: none;
     color: #0073CC;
 }
+
+/* PC (1400-1540px) */
+@media screen and (max-width: 1540px) and (min-width: 1400px) {
+    .login-form__content {
+        padding: 25px 12px;
+        max-width: 1100px;
+    }
+    
+    .form {
+        width: 55%;
+    }
+    
+    .form__input--text input {
+        height: 38px;
+        padding: 8px;
+    }
+    
+    .form__button-submit {
+        height: 38px;
+        padding: 8px 18px;
+    }
+}
+
+/* タブレット (768-850px) */
+@media screen and (max-width: 850px) and (min-width: 768px) {
+    .login-form__content {
+        padding: 20px 10px;
+        max-width: 100%;
+    }
+    
+    .form {
+        width: 70%;
+    }
+    
+    .form__input--text input {
+        height: 35px;
+        padding: 8px;
+        font-size: 14px;
+    }
+    
+    .form__button-submit {
+        height: 35px;
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    .register__link {
+        font-size: 14px;
+    }
+}

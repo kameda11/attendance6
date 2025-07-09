@@ -4,7 +4,7 @@
     font-family: 'Inter', sans-serif;
     background-color: #F0EFF2;
     min-height: 100vh;
-    padding: 20px 150px;
+    padding: 100px 150px;
 }
 
 .attendance-status {
@@ -106,20 +106,19 @@
 .attendance-buttons {
     display: flex;
     flex-direction: row;
-    gap: 50px;
     justify-content: center;
+    gap: 50px;
 }
 
 .button-group {
     display: flex;
-    gap: 15px;
     flex-wrap: wrap;
     justify-content: center;
 }
 
 .btn {
-    padding: 10px 20px;
-    font-size: 1.1em;
+    padding: 15px 60px;
+    font-size: 1.5em;
     font-weight: bold;
     border: none;
     border-radius: 20px;
@@ -152,4 +151,61 @@
 .btn-secondary {
     background: #FFFFFF;
     color: #000000;
+}
+
+.completion-message {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #000000;
+}
+
+/* PC (1400-1540px) */
+@media screen and (max-width: 1540px) and (min-width: 1400px) {
+    .attendance-container {
+        padding: 80px 120px;
+    }
+
+    .date-display {
+        font-size: 35px;
+    }
+
+    .time-display {
+        font-size: 70px;
+    }
+
+    .btn {
+        padding: 12px 50px;
+        font-size: 1.3em;
+        min-width: 110px;
+    }
+}
+
+/* タブレット (768-850px) */
+@media screen and (max-width: 850px) and (min-width: 768px) {
+    .attendance-container {
+        padding: 60px 40px;
+    }
+
+    .date-display {
+        font-size: 28px;
+    }
+
+    .time-display {
+        font-size: 55px;
+    }
+
+    .attendance-buttons {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .button-group {
+        justify-content: center;
+    }
+
+    .btn {
+        padding: 12px 40px;
+        font-size: 1.2em;
+        min-width: 100px;
+    }
 }

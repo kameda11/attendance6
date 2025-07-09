@@ -67,3 +67,59 @@ form {
     font-size: 16px;
     cursor: pointer;
 }
+
+/* PC (1400-1540px) */
+@media screen and (max-width: 1540px) and (min-width: 1400px) {
+    .verify-email__message {
+        padding: 25px 0;
+        max-width: 450px;
+        font-size: 15px;
+    }
+
+    .verify-email__actions {
+        gap: 35px;
+    }
+
+    .verify-email__mailtrap-btn,
+    .verify-email__check-btn {
+        padding: 10px 20px;
+        font-size: 15px;
+        width: 180px;
+    }
+
+    .verify-email__resend-btn {
+        font-size: 15px;
+    }
+}
+
+/* タブレット (768-850px) */
+@media screen and (max-width: 850px) and (min-width: 768px) {
+    .verify-email__content {
+        padding: 0 20px;
+    }
+
+    .verify-email__message {
+        padding: 20px 0;
+        max-width: 400px;
+        font-size: 14px;
+    }
+
+    .verify-email__actions {
+        gap: 25px;
+    }
+
+    .verify-email__mailtrap-btn,
+    .verify-email__check-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+        width: 160px;
+    }
+
+    form {
+        gap: 15px;
+    }
+
+    .verify-email__resend-btn {
+        font-size: 14px;
+    }
+}

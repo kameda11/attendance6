@@ -8,6 +8,7 @@
 .attendance-detail-header {
     margin-bottom: 30px;
     text-align: left;
+    padding: 20px;
 }
 
 .attendance-detail-header h1 {
@@ -16,7 +17,6 @@
     font-size: 1.5em;
     border-left: 8px solid #000000;
     padding-left: 10px;
-    margin-bottom: 10px;
 }
 
 .attendance-detail-table {
@@ -103,7 +103,8 @@ tr:last-child td {
 .attendance-detail-actions {
     display: flex;
     justify-content: right;
-    margin-top: 20px;
+    margin-top: 30px;
+    padding: 20px;
 }
 
 .btn {
@@ -156,4 +157,133 @@ tr:last-child td {
 
 .time-end {
     font-weight: bold;
+}
+
+/* PC (1400-1540px) */
+@media screen and (max-width: 1540px) and (min-width: 1400px) {
+    .attendance-detail-container {
+        padding: 40px 200px;
+    }
+
+    .attendance-detail-header h1 {
+        font-size: 1.4em;
+    }
+
+    th {
+        padding: 18px 40px;
+        width: 25%;
+    }
+
+    td {
+        padding: 18px;
+    }
+
+    .time-inputs {
+        gap: 8px;
+    }
+
+    .time-inputs label {
+        font-size: 15px;
+        margin: 0 4px;
+    }
+
+    .notes-content {
+        max-width: 250px;
+        font-size: 14px;
+    }
+
+    .btn-primary {
+        padding: 8px 40px;
+        font-size: 1.1em;
+    }
+
+    .date-section {
+        gap: 25px;
+    }
+
+    .date-year-section {
+        margin-right: 30px;
+    }
+
+    .time-separator {
+        margin: 0 25px;
+    }
+}
+
+/* タブレット (768-850px) */
+@media screen and (max-width: 850px) and (min-width: 768px) {
+    .attendance-detail-container {
+        padding: 30px 90px;
+    }
+
+    .attendance-detail-header h1 {
+        font-size: 1.3em;
+        border-left: 6px solid #000000;
+        padding-left: 8px;
+    }
+
+    th {
+        padding: 12px 15px;
+        width: 25%;
+        font-size: 13px;
+    }
+
+    td {
+        padding: 12px 15px;
+        font-size: 13px;
+    }
+
+    .time-inputs {
+        gap: 6px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .time-display {
+        min-width: 50px;
+    }
+
+    .time-inputs label {
+        font-size: 14px;
+        margin: 0 3px;
+    }
+
+    .notes-content {
+        max-width: 200px;
+        font-size: 12px;
+    }
+
+    .break-item {
+        gap: 8px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .attendance-detail-actions {
+        margin-top: 30px;
+        padding: 20px;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
+
+    .btn-primary {
+        padding: 6px 25px;
+        font-size: 0.9em;
+    }
+
+    .date-section {
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .date-year-section {
+        margin-right: 15px;
+    }
+
+    .time-separator {
+        margin: 0 15px;
+    }
 }

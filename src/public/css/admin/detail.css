@@ -96,7 +96,7 @@ tr:last-child td {
     font-size: 14px;
     width: 400px;
     resize: vertical;
-    font-family: inherit;   
+    font-family: inherit;
 }
 
 .attendance-detail-actions {
@@ -135,4 +135,111 @@ tr:last-child td {
     color: #ff0000;
     font-size: 14px;
     margin-top: 5px;
+}
+
+/* PC (1400-1540px) */
+@media screen and (max-width: 1540px) and (min-width: 1400px) {
+    .attendance-detail-container {
+        padding: 40px 200px;
+    }
+
+    .attendance-detail-header h1 {
+        font-size: 1.4em;
+    }
+
+    th {
+        padding: 18px 40px;
+        width: 25%;
+    }
+
+    td {
+        padding: 18px;
+    }
+
+    .time-inputs {
+        gap: 12px;
+    }
+
+    .time-input input[type="text"] {
+        width: 75px;
+        font-size: 13px;
+    }
+
+    .notes-textbox {
+        width: 350px;
+        font-size: 13px;
+    }
+}
+
+/* タブレット (768-850px) */
+@media screen and (max-width: 850px) and (min-width: 768px) {
+    .attendance-detail-container {
+        padding: 30px 90px;
+    }
+
+    .attendance-detail-header {
+        align-items: flex-start;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .attendance-detail-header h1 {
+        font-size: 1.3em;
+        border-left: 6px solid #000000;
+        padding-left: 8px;
+    }
+
+    th {
+        padding: 12px 15px;
+        width: 30%;
+        font-size: 13px;
+    }
+
+    td {
+        padding: 12px 15px;
+        font-size: 13px;
+    }
+
+    .time-inputs {
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .time-input input[type="text"] {
+        width: 70px;
+        font-size: 12px;
+    }
+
+    .time-inputs label {
+        font-size: 14px;
+    }
+
+    .status-select {
+        font-size: 13px;
+        min-width: 100px;
+    }
+
+    .notes-textbox {
+        width: 100%;
+        max-width: 300px;
+        font-size: 12px;
+    }
+
+    .attendance-detail-actions {
+        padding: 15px;
+    }
+
+    .btn-primary {
+        padding: 6px 30px;
+        font-size: 1em;
+    }
+
+    .date-section {
+        gap: 50px;
+        flex-wrap: wrap;
+    }
+
+    .date-year-section {
+        margin-right: 20px;
+    }
 }

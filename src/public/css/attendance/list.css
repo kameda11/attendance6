@@ -1,6 +1,6 @@
 .attendance-list-container {
     margin: 0 auto;
-    padding: 20px 150px;
+    padding: 50px 150px;
     background-color: #F0EFF2;
     min-height: 100vh;
 }
@@ -83,7 +83,6 @@
     right: 8px;
     top: 50%;
     transform: translateY(-50%);
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -104,6 +103,7 @@
     border: none;
     text-decoration: none;
     display: inline-block;
+    border-radius: 10px;
 }
 
 .btn-secondary {
@@ -190,4 +190,142 @@ td a {
     border-radius: 3px;
     font-size: 0.8em;
     margin-left: 5px;
+}
+
+/* PC (1400-1540px) */
+@media screen and (max-width: 1540px) and (min-width: 1400px) {
+    .attendance-list-container {
+        padding: 40px 150px;
+    }
+
+    .attendance-list-header h1 {
+        font-size: 1.4em;
+    }
+
+    .nav-button {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .current-date h2 {
+        font-size: 16px;
+    }
+
+    .attendance-main {
+        margin-top: 40px;
+    }
+
+    th {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    td {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    .action-button {
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+
+    .status-badge {
+        font-size: 0.75em;
+        min-width: 55px;
+    }
+
+    .pending-badge {
+        font-size: 0.75em;
+    }
+}
+
+/* タブレット (768-850px) */
+@media screen and (max-width: 850px) and (min-width: 768px) {
+    .attendance-list-container {
+        padding: 30px;
+    }
+
+    .attendance-list-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .attendance-list-header h1 {
+        font-size: 1.3em;
+        border-left: 6px solid #000000;
+        padding-left: 8px;
+    }
+
+    .nav-content {
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .nav-button {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .current-date {
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .current-date h2 {
+        font-size: 15px;
+        margin: 5px;
+        order: 2;
+    }
+
+    .calendar-button {
+        order: 1;
+        position: static;
+        transform: none;
+        right: auto;
+        top: auto;
+    }
+
+    .attendance-main {
+        margin-top: 30px;
+    }
+
+    .attendance-table {
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 700px;
+        font-size: 12px;
+    }
+
+    th {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+
+    td {
+        padding: 8px 6px;
+        font-size: 11px;
+    }
+
+    .action-button {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .status-badge {
+        font-size: 0.7em;
+        min-width: 50px;
+        padding: 3px 6px;
+    }
+
+    .pending-badge {
+        font-size: 0.7em;
+        padding: 1px 4px;
+        margin-left: 3px;
+    }
 }

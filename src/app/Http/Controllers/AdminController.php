@@ -323,17 +323,19 @@ class AdminController extends Controller
 
         // 時間データの処理
         if ($validated['clock_in_time'] ?? null) {
-            // 既に完全な日時文字列の場合はそのまま使用、そうでなければ日付と結合
-            $clockInTime = strpos($validated['clock_in_time'], ' ') !== false
-                ? $validated['clock_in_time']
-                : $date . ' ' . $validated['clock_in_time'] . ':00';
+            // 時刻のみの場合は日付と結合、完全な日時文字列の場合はそのまま使用
+            $clockInTime = $validated['clock_in_time'];
+            if (preg_match('/^\d{1,2}:\d{2}$/', $clockInTime)) {
+                $clockInTime = $date . ' ' . $clockInTime . ':00';
+            }
             $updateData['clock_in_time'] = $clockInTime;
         }
         if ($validated['clock_out_time'] ?? null) {
-            // 既に完全な日時文字列の場合はそのまま使用、そうでなければ日付と結合
-            $clockOutTime = strpos($validated['clock_out_time'], ' ') !== false
-                ? $validated['clock_out_time']
-                : $date . ' ' . $validated['clock_out_time'] . ':00';
+            // 時刻のみの場合は日付と結合、完全な日時文字列の場合はそのまま使用
+            $clockOutTime = $validated['clock_out_time'];
+            if (preg_match('/^\d{1,2}:\d{2}$/', $clockOutTime)) {
+                $clockOutTime = $date . ' ' . $clockOutTime . ':00';
+            }
             $updateData['clock_out_time'] = $clockOutTime;
         }
 
@@ -365,17 +367,19 @@ class AdminController extends Controller
 
         // 時間データの処理
         if ($validated['clock_in_time'] ?? null) {
-            // 既に完全な日時文字列の場合はそのまま使用、そうでなければ日付と結合
-            $clockInTime = strpos($validated['clock_in_time'], ' ') !== false
-                ? $validated['clock_in_time']
-                : $date . ' ' . $validated['clock_in_time'] . ':00';
+            // 時刻のみの場合は日付と結合、完全な日時文字列の場合はそのまま使用
+            $clockInTime = $validated['clock_in_time'];
+            if (preg_match('/^\d{1,2}:\d{2}$/', $clockInTime)) {
+                $clockInTime = $date . ' ' . $clockInTime . ':00';
+            }
             $createData['clock_in_time'] = $clockInTime;
         }
         if ($validated['clock_out_time'] ?? null) {
-            // 既に完全な日時文字列の場合はそのまま使用、そうでなければ日付と結合
-            $clockOutTime = strpos($validated['clock_out_time'], ' ') !== false
-                ? $validated['clock_out_time']
-                : $date . ' ' . $validated['clock_out_time'] . ':00';
+            // 時刻のみの場合は日付と結合、完全な日時文字列の場合はそのまま使用
+            $clockOutTime = $validated['clock_out_time'];
+            if (preg_match('/^\d{1,2}:\d{2}$/', $clockOutTime)) {
+                $clockOutTime = $date . ' ' . $clockOutTime . ':00';
+            }
             $createData['clock_out_time'] = $clockOutTime;
         }
 

@@ -1,5 +1,5 @@
 .attendance-detail-container {
-    padding: 50px 250px;
+    padding: 50px 150px;
     background-color: #F0EFF2;
     min-height: 100vh;
 }
@@ -9,6 +9,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    padding: 20px;
 }
 
 .attendance-detail-header h1 {
@@ -54,7 +55,7 @@ th {
     font-weight: bold;
     color: #737373;
     border-bottom: 2px solid #E1E1E1;
-    width: 30%;
+    width: 25%;
 }
 
 td {
@@ -129,6 +130,7 @@ tr:last-child td {
     display: flex;
     justify-content: right;
     margin-top: 30px;
+    padding: 20px;
 }
 
 .btn-primary {
@@ -179,7 +181,7 @@ tr:last-child td {
 .date-year {
     color: #000000;
     font-weight: bold;
-    margin-right: 60px;
+    margin-right: 100px;
 }
 
 .date-month-day {
@@ -256,4 +258,154 @@ tr:last-child td {
     color: #ff0000;
     font-size: 14px;
     margin-top: 5px;
+}
+
+/* PC (1400-1540px) */
+@media screen and (max-width: 1540px) and (min-width: 1400px) {
+    .attendance-detail-container {
+        padding: 40px 200px;
+    }
+
+    .attendance-detail-header h1 {
+        font-size: 1.4em;
+    }
+
+    th {
+        padding: 18px 40px;
+        width: 25%;
+    }
+
+    td {
+        padding: 18px;
+    }
+
+    .time-inputs {
+        gap: 12px;
+    }
+
+    .time-input input[type="text"] {
+        width: 75px;
+        font-size: 13px;
+    }
+
+    .time-inputs label {
+        font-size: 15px;
+        margin: 0 8px;
+    }
+
+    .status-textbox,
+    .notes-textarea {
+        width: 350px;
+        font-size: 13px;
+    }
+
+    .status-select {
+        font-size: 13px;
+        min-width: 110px;
+    }
+
+    .btn-primary {
+        padding: 8px 40px;
+        font-size: 1.1em;
+    }
+
+    .date-year {
+        margin-right: 50px;
+    }
+
+    .pending-time-separator,
+    .pending-break-separator {
+        margin: 0 25px;
+    }
+}
+
+/* タブレット (768-850px) */
+@media screen and (max-width: 850px) and (min-width: 768px) {
+    .attendance-detail-container {
+        padding: 30px 90px;
+    }
+
+    .attendance-detail-header {
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .attendance-detail-header h1 {
+        font-size: 1.3em;
+        border-left: 6px solid #000000;
+        padding-left: 8px;
+    }
+
+    th {
+        padding: 12px 15px;
+        width: 25%;
+        font-size: 13px;
+    }
+
+    td {
+        padding: 12px 15px;
+        font-size: 13px;
+    }
+
+    .time-inputs {
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .time-input input[type="text"] {
+        width: 70px;
+        font-size: 12px;
+    }
+
+    .time-inputs label {
+        font-size: 14px;
+        margin: 0 6px;
+    }
+
+    .status-textbox,
+    .notes-textarea {
+        width: 100%;
+        max-width: 300px;
+        font-size: 12px;
+    }
+
+    .status-select {
+        font-size: 12px;
+        min-width: 100px;
+    }
+
+    .attendance-detail-actions {
+        margin-top: 20px;
+    }
+
+    .btn-primary {
+        padding: 6px 25px;
+        font-size: 0.9em;
+    }
+
+    .time-display,
+    .date-display,
+    .date-year,
+    .date-month-day {
+        font-size: 14px;
+    }
+
+    .date-year {
+        margin-right: 50px;
+    }
+
+    .pending-time-separator,
+    .pending-break-separator {
+        margin: 0 15px;
+    }
+
+    .notes-display {
+        font-size: 12px;
+        min-height: 60px;
+    }
+
+    .status-badge {
+        min-width: 70px;
+        font-size: 12px;
+    }
 }

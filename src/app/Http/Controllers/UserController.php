@@ -749,16 +749,20 @@ class UserController extends Controller
 
         // 時間データの処理
         if ($request->clock_in_time) {
-            // 既に完全な日時文字列の場合はそのまま使用、そうでなければ:00を追加
-            $requestData['clock_in_time'] = strpos($request->clock_in_time, ':00') !== false
-                ? $request->clock_in_time
-                : $request->clock_in_time . ':00';
+            // 時刻のみの場合は:00を追加、完全な日時文字列の場合はそのまま使用
+            $clockInTime = $request->clock_in_time;
+            if (preg_match('/^\d{1,2}:\d{2}$/', $clockInTime)) {
+                $clockInTime .= ':00';
+            }
+            $requestData['clock_in_time'] = $clockInTime;
         }
         if ($request->clock_out_time) {
-            // 既に完全な日時文字列の場合はそのまま使用、そうでなければ:00を追加
-            $requestData['clock_out_time'] = strpos($request->clock_out_time, ':00') !== false
-                ? $request->clock_out_time
-                : $request->clock_out_time . ':00';
+            // 時刻のみの場合は:00を追加、完全な日時文字列の場合はそのまま使用
+            $clockOutTime = $request->clock_out_time;
+            if (preg_match('/^\d{1,2}:\d{2}$/', $clockOutTime)) {
+                $clockOutTime .= ':00';
+            }
+            $requestData['clock_out_time'] = $clockOutTime;
         }
 
         // 休憩情報を収集
