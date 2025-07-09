@@ -55,12 +55,15 @@ class AdminController extends Controller
      */
     public function logout(Request $request)
     {
+        // 管理者セッション情報を削除
         $request->session()->forget('admin_logged_in');
         $request->session()->forget('admin_email');
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
 
-        return redirect()->route('admin.login.form');
+        // セッションを無効化して新しいセッションを開始
+        $request->session()->invalidate();
+        $request->session()->regenerate();
+
+        return redirect('/admin/login');
     }
 
     /**
