@@ -13,7 +13,9 @@
         @method('PUT')
         <input type="hidden" name="date" value="{{ $selectedDate ? $selectedDate->format('Y-m-d') : $attendance->created_at->format('Y-m-d') }}">
         @else
-        <input type="hidden" name="user_id" value="{{ $user ? $user->id : '' }}">
+        @if($user)
+        <input type="hidden" name="user_id" value="{{ $user->id }}">
+        @endif
         <input type="hidden" name="date" value="{{ $selectedDate ? $selectedDate->format('Y-m-d') : '' }}">
         @endif
         <div class="attendance-detail-table">

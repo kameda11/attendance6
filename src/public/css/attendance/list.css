@@ -142,12 +142,14 @@ th {
     font-weight: bold;
     color: #737373;
     border-bottom: 3px solid #E1E1E1;
+    font-weight: bold;
 }
 
 td {
     padding: 12px 15px;
     border-bottom: 2px solid #E1E1E1;
     color: #737373;
+    font-weight: bold;
 }
 
 td a {

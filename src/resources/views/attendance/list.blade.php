@@ -49,32 +49,35 @@
                 </thead>
                 <tbody>
                     @foreach($calendar as $date)
-                    <tr class="{{ $date['isToday'] ? 'today' : '' }} {{ $date['isWeekend'] ? 'weekend' : '' }} {{ $date['hasPendingRequest'] ? 'pending-request' : '' }}">
+                    <tr class="{{ $date['isToday'] ? 'today' : '' }} {{ $date['isWeekend'] ? 'weekend' : '' }} {{ $date['hasApprovedRequest'] ? 'approved-request' : '' }}">
                         <td>
                             {{ $currentMonth->format('m') }}/{{ sprintf('%02d', $date['day']) }}({{ $date['weekday'] }})
-                            @if($date['hasPendingRequest'])
-                            <span class="pending-badge">申請中</span>
-                            @endif
                         </td>
                         <td>
-                            @if($date['hasPendingRequest'] && $date['attendanceRequest'])
+                            @if($date['hasApprovedRequest'] && $date['attendanceRequest'])
                             {{ $date['attendanceRequest']->clock_in_time ? $date['attendanceRequest']->clock_in_time->format('H:i') : '' }}
                             @elseif($date['attendance'])
                             {{ $date['attendance']->clock_in_time ? $date['attendance']->clock_in_time->format('H:i') : '' }}
                             @endif
                         </td>
                         <td>
-                            @if($date['hasPendingRequest'] && $date['attendanceRequest'])
+                            @if($date['hasApprovedRequest'] && $date['attendanceRequest'])
                             {{ $date['attendanceRequest']->clock_out_time ? $date['attendanceRequest']->clock_out_time->format('H:i') : '' }}
                             @elseif($date['attendance'])
                             {{ $date['attendance']->clock_out_time ? $date['attendance']->clock_out_time->format('H:i') : '' }}
                             @endif
                         </td>
-                        <td>{{ $date['breakTime'] }}</td>
-                        <td>{{ $date['workTime'] }}</td>
+                        <td>
+                            {{ $date['breakTime'] }}
+                        </td>
+                        <td>
+                            {{ $date['workTime'] }}
+                        </td>
                         <td>
                             @if($date['attendance'])
                             <a href="{{ route('user.attendance.detail', ['id' => $date['attendance']->id]) }}" class="action-button detail">詳細</a>
+                            @elseif($date['hasApprovedRequest'])
+                            <a href="{{ route('user.attendance.detail', ['id' => 0, 'date' => $date['date']]) }}" class="action-button detail">詳細</a>
                             @else
                             <a href="{{ route('user.attendance.detail', ['id' => 0, 'date' => $date['date']]) }}" class="action-button detail">詳細</a>
                             @endif

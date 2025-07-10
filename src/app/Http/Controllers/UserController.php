@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Attendance;
 use App\Models\BreakRequest;
+use App\Models\Breaktime;
 use App\Models\AttendanceRequest as AttendanceRequestModel;
 use App\Http\Requests\AttendanceFormRequest;
 
@@ -229,24 +230,46 @@ class UserController extends Controller
         // その月の勤怠データを取得
         $attendances = $user->attendances()
             ->with('breaks')
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->where(function ($query) use ($year, $month) {
+                $query->where(function ($q) use ($year, $month) {
+                    $q->whereYear('created_at', $year)
+                        ->whereMonth('created_at', $month);
+                })->orWhere(function ($q) use ($year, $month) {
+                    $q->whereYear('clock_in_time', $year)
+                        ->whereMonth('clock_in_time', $month);
+                })->orWhere(function ($q) use ($year, $month) {
+                    $q->whereYear('clock_out_time', $year)
+                        ->whereMonth('clock_out_time', $month);
+                });
+            })
             ->get()
             ->keyBy(function ($attendance) {
-                return $attendance->created_at->format('Y-m-d');
+                // 実際の勤怠日を優先してキーとして使用
+                if ($attendance->clock_in_time) {
+                    return $attendance->clock_in_time->format('Y-m-d');
+                } elseif ($attendance->clock_out_time) {
+                    return $attendance->clock_out_time->format('Y-m-d');
+                } else {
+                    return $attendance->created_at->format('Y-m-d');
+                }
             });
 
-        // その月の申請データを取得
+        // その月の申請データを取得（承認済みのみ）
         $attendanceRequests = $user->attendanceRequests()
-            ->where('status', 'pending')
+            ->where('status', 'approved')
             ->whereBetween('target_date', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
             ->get()
-            ->keyBy('target_date');
+            ->keyBy(function ($request) {
+                return $request->target_date->format('Y-m-d');
+            });
 
         $breakRequests = $user->breakRequests()
-            ->where('status', 'pending')
+            ->where('status', 'approved')
             ->whereBetween('target_date', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')])
             ->get()
-            ->groupBy('target_date');
+            ->groupBy(function ($request) {
+                return $request->target_date->format('Y-m-d');
+            });
 
         // カレンダー配列を作成
         $calendar = [];
@@ -261,21 +284,24 @@ class UserController extends Controller
             // 勤務時間と休憩時間の計算
             $workTime = '';
             $breakTime = '';
-            $hasPendingRequest = false;
+            $hasApprovedRequest = false;
 
+            // 承認済み申請データを処理
             if ($attendanceRequest) {
-                // 申請中のデータがある場合
-                $hasPendingRequest = true;
+                $hasApprovedRequest = true;
 
                 if ($attendanceRequest->clock_in_time && $attendanceRequest->clock_out_time) {
                     $workTime = $this->calculateWorkTime($attendanceRequest->clock_in_time, $attendanceRequest->clock_out_time, []);
                 }
 
-                // 申請中の休憩データを処理
+                // 申請の休憩データを処理
                 if ($attendanceRequest->break_info) {
                     $breakTime = $this->calculateBreakTimeFromInfo($attendanceRequest->break_info);
                 }
-            } elseif ($attendance) {
+            }
+
+            // 申請データがない場合のみ実際の勤怠記録を使用
+            if (!$attendanceRequest && $attendance) {
                 // 実際の勤怠記録がある場合
                 if ($attendance->clock_in_time && $attendance->clock_out_time) {
                     $workTime = $this->calculateWorkTime($attendance->clock_in_time, $attendance->clock_out_time, $attendance->breaks);
@@ -292,7 +318,7 @@ class UserController extends Controller
                 'date' => $currentDate->format('Y-m-d'),
                 'attendance' => $attendance,
                 'attendanceRequest' => $attendanceRequest,
-                'hasPendingRequest' => $hasPendingRequest,
+                'hasApprovedRequest' => $hasApprovedRequest,
                 'workTime' => $workTime,
                 'breakTime' => $breakTime,
                 'isToday' => $currentDate->isToday(),
@@ -356,9 +382,26 @@ class UserController extends Controller
 
         foreach ($breakInfo as $break) {
             if (isset($break['start_time']) && isset($break['end_time'])) {
-                $startTime = \Carbon\Carbon::parse($break['start_time']);
-                $endTime = \Carbon\Carbon::parse($break['end_time']);
-                $totalMinutes += $startTime->diffInMinutes($endTime);
+                try {
+                    // 時間形式をチェックして適切に解析
+                    $startTimeStr = $break['start_time'];
+                    $endTimeStr = $break['end_time'];
+
+                    // 時間のみの形式（HH:MM）の場合
+                    if (preg_match('/^\d{1,2}:\d{2}$/', $startTimeStr) && preg_match('/^\d{1,2}:\d{2}$/', $endTimeStr)) {
+                        $startTime = \Carbon\Carbon::createFromFormat('H:i', $startTimeStr);
+                        $endTime = \Carbon\Carbon::createFromFormat('H:i', $endTimeStr);
+                    } else {
+                        // 日時形式の場合
+                        $startTime = \Carbon\Carbon::parse($startTimeStr);
+                        $endTime = \Carbon\Carbon::parse($endTimeStr);
+                    }
+
+                    $totalMinutes += $startTime->diffInMinutes($endTime);
+                } catch (\Exception $e) {
+                    // 解析に失敗した場合はスキップ
+                    continue;
+                }
             }
         }
 
@@ -439,7 +482,8 @@ class UserController extends Controller
                 $pendingAttendanceRequest = AttendanceRequestModel::where('attendance_id', $attendance->id)
                     ->where('status', 'pending')
                     ->first();
-                $pendingBreakRequests = BreakRequest::where('attendance_id', $attendance->id)
+                $pendingBreakRequests = BreakRequest::where('user_id', $user->id)
+                    ->where('target_date', $attendance->created_at->format('Y-m-d'))
                     ->where('status', 'pending')
                     ->get();
             } else {
@@ -497,8 +541,23 @@ class UserController extends Controller
         } elseif ($hasPendingRequest && $pendingAttendanceRequest && $pendingAttendanceRequest->break_info) {
             $firstBreakInfo = $pendingAttendanceRequest->break_info[0] ?? null;
             if ($firstBreakInfo) {
-                $data['break1StartTime'] = $firstBreakInfo['start_time'] ?? '';
-                $data['break1EndTime'] = $firstBreakInfo['end_time'] ?? '';
+                // 時間形式をチェックして適切に処理
+                $startTimeStr = $firstBreakInfo['start_time'] ?? '';
+                $endTimeStr = $firstBreakInfo['end_time'] ?? '';
+
+                // 日時形式の場合は時間部分のみを抽出
+                if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $startTimeStr)) {
+                    $data['break1StartTime'] = substr($startTimeStr, 11, 5); // HH:MM部分を抽出
+                } else {
+                    $data['break1StartTime'] = $startTimeStr;
+                }
+
+                if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $endTimeStr)) {
+                    $data['break1EndTime'] = substr($endTimeStr, 11, 5); // HH:MM部分を抽出
+                } else {
+                    $data['break1EndTime'] = $endTimeStr;
+                }
+
                 $data['break1Notes'] = '';
             } else {
                 $data['break1StartTime'] = '';
@@ -529,8 +588,23 @@ class UserController extends Controller
         } elseif ($hasPendingRequest && $pendingAttendanceRequest && $pendingAttendanceRequest->break_info && count($pendingAttendanceRequest->break_info) > 1) {
             $secondBreakInfo = $pendingAttendanceRequest->break_info[1] ?? null;
             if ($secondBreakInfo) {
-                $data['break2StartTime'] = $secondBreakInfo['start_time'] ?? '';
-                $data['break2EndTime'] = $secondBreakInfo['end_time'] ?? '';
+                // 時間形式をチェックして適切に処理
+                $startTimeStr = $secondBreakInfo['start_time'] ?? '';
+                $endTimeStr = $secondBreakInfo['end_time'] ?? '';
+
+                // 日時形式の場合は時間部分のみを抽出
+                if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $startTimeStr)) {
+                    $data['break2StartTime'] = substr($startTimeStr, 11, 5); // HH:MM部分を抽出
+                } else {
+                    $data['break2StartTime'] = $startTimeStr;
+                }
+
+                if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $endTimeStr)) {
+                    $data['break2EndTime'] = substr($endTimeStr, 11, 5); // HH:MM部分を抽出
+                } else {
+                    $data['break2EndTime'] = $endTimeStr;
+                }
+
                 $data['break2Notes'] = '';
             } else {
                 $data['break2StartTime'] = '';
@@ -574,7 +648,8 @@ class UserController extends Controller
             $hasAttendanceRequest = AttendanceRequestModel::where('attendance_id', $attendance->id)
                 ->where('status', 'pending')
                 ->exists();
-            $hasBreakRequest = BreakRequest::where('attendance_id', $attendance->id)
+            $hasBreakRequest = BreakRequest::where('user_id', $user->id)
+                ->where('target_date', $attendance->created_at->format('Y-m-d'))
                 ->where('status', 'pending')
                 ->exists();
             return $hasAttendanceRequest || $hasBreakRequest;
@@ -610,9 +685,10 @@ class UserController extends Controller
                 ->first();
 
             if ($existingRequest) {
-                return back()->withErrors(['general' => '既に保留中の申請があります。']);
+                return back()->withErrors(['general' => '既に保留中の申請があります']);
             }
 
+            // 修正申請データを作成
             $requestData = [
                 'user_id' => $user->id,
                 'attendance_id' => $id,
@@ -624,16 +700,20 @@ class UserController extends Controller
 
             // 時間データの処理
             if ($request->clock_in_time) {
-                // 既に完全な日時文字列の場合はそのまま使用、そうでなければ:00を追加
-                $requestData['clock_in_time'] = strpos($request->clock_in_time, ':00') !== false
-                    ? $request->clock_in_time
-                    : $request->clock_in_time . ':00';
+                $clockInTime = $request->clock_in_time;
+                // 時刻のみの形式（HH:MM）の場合のみ日付を追加
+                if (preg_match('/^\d{1,2}:\d{2}$/', $clockInTime)) {
+                    $clockInTime = $attendance->created_at->format('Y-m-d') . ' ' . $clockInTime;
+                }
+                $requestData['clock_in_time'] = $clockInTime;
             }
             if ($request->clock_out_time) {
-                // 既に完全な日時文字列の場合はそのまま使用、そうでなければ:00を追加
-                $requestData['clock_out_time'] = strpos($request->clock_out_time, ':00') !== false
-                    ? $request->clock_out_time
-                    : $request->clock_out_time . ':00';
+                $clockOutTime = $request->clock_out_time;
+                // 時刻のみの形式（HH:MM）の場合のみ日付を追加
+                if (preg_match('/^\d{1,2}:\d{2}$/', $clockOutTime)) {
+                    $clockOutTime = $attendance->created_at->format('Y-m-d') . ' ' . $clockOutTime;
+                }
+                $requestData['clock_out_time'] = $clockOutTime;
             }
 
             // 勤怠申請を作成
@@ -642,7 +722,7 @@ class UserController extends Controller
             // 休憩時間の申請処理
             $this->processBreakRequests($user, $attendance, $request);
 
-            return redirect()->route('user.attendance.list')->with('success', '修正申請を送信しました。承認をお待ちください。');
+            return redirect()->route('user.attendance.list');
         } catch (\Exception $e) {
             return back()->withErrors(['general' => 'エラーが発生しました: ' . $e->getMessage()]);
         }
@@ -694,10 +774,22 @@ class UserController extends Controller
 
         // 時間データの処理
         if ($request->$startTimeField) {
-            $requestData['start_time'] = $request->$startTimeField . ':00';
+            $startTime = $request->$startTimeField;
+            // 時刻のみの形式（HH:MM）の場合はそのまま使用
+            if (preg_match('/^\d{1,2}:\d{2}$/', $startTime)) {
+                $requestData['start_time'] = $startTime;
+            } else {
+                $requestData['start_time'] = $startTime;
+            }
         }
         if ($request->$endTimeField) {
-            $requestData['end_time'] = $request->$endTimeField . ':00';
+            $endTime = $request->$endTimeField;
+            // 時刻のみの形式（HH:MM）の場合はそのまま使用
+            if (preg_match('/^\d{1,2}:\d{2}$/', $endTime)) {
+                $requestData['end_time'] = $endTime;
+            } else {
+                $requestData['end_time'] = $endTime;
+            }
         }
 
         // 既に保留中の申請があるかチェック
@@ -719,76 +811,197 @@ class UserController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        // 指定された日付で既に勤怠記録が存在するかチェック
-        $existingAttendance = $user->attendances()
-            ->whereDate('created_at', $request->date)
-            ->first();
+        try {
+            // 指定された日付で既に勤怠記録が存在するかチェック
+            $existingAttendance = $user->attendances()
+                ->whereDate('created_at', $request->date)
+                ->first();
 
-        if ($existingAttendance) {
-            return back()->withErrors(['date' => '指定された日付には既に勤怠記録が存在します。']);
-        }
-
-        // 既に保留中の申請があるかチェック
-        $existingRequest = $user->attendanceRequests()
-            ->where('target_date', $request->date)
-            ->where('status', 'pending')
-            ->first();
-
-        if ($existingRequest) {
-            return back()->withErrors(['date' => '既に保留中の申請があります。']);
-        }
-
-        $requestData = [
-            'user_id' => $user->id,
-            'attendance_id' => null,
-            'target_date' => $request->date,
-            'request_type' => 'create',
-            'status' => 'pending',
-            'notes' => $request->notes,
-        ];
-
-        // 時間データの処理
-        if ($request->clock_in_time) {
-            // 時刻のみの場合は:00を追加、完全な日時文字列の場合はそのまま使用
-            $clockInTime = $request->clock_in_time;
-            if (preg_match('/^\d{1,2}:\d{2}$/', $clockInTime)) {
-                $clockInTime .= ':00';
+            if ($existingAttendance) {
+                return back()->withErrors(['date' => '指定された日付には既に勤怠記録が存在します']);
             }
-            $requestData['clock_in_time'] = $clockInTime;
-        }
-        if ($request->clock_out_time) {
-            // 時刻のみの場合は:00を追加、完全な日時文字列の場合はそのまま使用
-            $clockOutTime = $request->clock_out_time;
-            if (preg_match('/^\d{1,2}:\d{2}$/', $clockOutTime)) {
-                $clockOutTime .= ':00';
+
+            // 既に保留中の申請があるかチェック
+            $existingRequest = $user->attendanceRequests()
+                ->where('target_date', $request->date)
+                ->where('status', 'pending')
+                ->first();
+
+            if ($existingRequest) {
+                return back()->withErrors(['date' => '既に保留中の申請があります']);
             }
-            $requestData['clock_out_time'] = $clockOutTime;
-        }
 
-        // 休憩情報を収集
-        $breakInfo = [];
-        if ($request->break1_start_time || $request->break1_end_time) {
-            $breakInfo[] = [
-                'start_time' => $request->break1_start_time,
-                'end_time' => $request->break1_end_time,
+            // 新規作成申請データを作成
+            $requestData = [
+                'user_id' => $user->id,
+                'attendance_id' => null,
+                'target_date' => $request->date,
+                'request_type' => 'create',
+                'status' => 'pending',
+                'notes' => $request->notes,
             ];
+
+            // 時間データの処理
+            if ($request->clock_in_time) {
+                $clockInTime = $request->clock_in_time;
+                // 時刻のみの形式（HH:MM）の場合のみ日付を追加
+                if (preg_match('/^\d{1,2}:\d{2}$/', $clockInTime)) {
+                    $clockInTime = $request->date . ' ' . $clockInTime;
+                }
+                $requestData['clock_in_time'] = $clockInTime;
+            }
+            if ($request->clock_out_time) {
+                $clockOutTime = $request->clock_out_time;
+                // 時刻のみの形式（HH:MM）の場合のみ日付を追加
+                if (preg_match('/^\d{1,2}:\d{2}$/', $clockOutTime)) {
+                    $clockOutTime = $request->date . ' ' . $clockOutTime;
+                }
+                $requestData['clock_out_time'] = $clockOutTime;
+            }
+
+            // 休憩情報を収集
+            $breakInfo = [];
+            if ($request->break1_start_time || $request->break1_end_time) {
+                $breakInfo[] = [
+                    'start_time' => $request->break1_start_time ?: null,
+                    'end_time' => $request->break1_end_time ?: null,
+                ];
+            }
+            if ($request->break2_start_time || $request->break2_end_time) {
+                $breakInfo[] = [
+                    'start_time' => $request->break2_start_time ?: null,
+                    'end_time' => $request->break2_end_time ?: null,
+                ];
+            }
+
+            // 休憩情報を追加
+            if (!empty($breakInfo)) {
+                $requestData['break_info'] = $breakInfo;
+            }
+
+            // 勤怠申請を作成
+            $attendanceRequest = AttendanceRequestModel::create($requestData);
+
+            return redirect()->route('user.attendance.list');
+        } catch (\Exception $e) {
+            return back()->withErrors(['general' => 'エラーが発生しました: ' . $e->getMessage()]);
         }
-        if ($request->break2_start_time || $request->break2_end_time) {
-            $breakInfo[] = [
-                'start_time' => $request->break2_start_time,
-                'end_time' => $request->break2_end_time,
+    }
+
+    /**
+     * 休憩時間を更新
+     */
+    private function updateBreakTimes($attendance, $request)
+    {
+        $date = $attendance->created_at->format('Y-m-d');
+
+        // 既存の休憩時間を削除
+        $attendance->breaks()->delete();
+
+        // 休憩1の処理
+        if ($request->break1_start_time) {
+            $startTime = $request->break1_start_time;
+            // 時間のみの形式（HH:MM）の場合は:00を追加
+            if (preg_match('/^\d{1,2}:\d{2}$/', $startTime)) {
+                $startTime .= ':00';
+            }
+
+            $breakData = [
+                'attendance_id' => $attendance->id,
+                'start_time' => $date . ' ' . $startTime,
             ];
+
+            if ($request->break1_end_time) {
+                $endTime = $request->break1_end_time;
+                // 時間のみの形式（HH:MM）の場合は:00を追加
+                if (preg_match('/^\d{1,2}:\d{2}$/', $endTime)) {
+                    $endTime .= ':00';
+                }
+                $breakData['end_time'] = $date . ' ' . $endTime;
+            }
+            Breaktime::create($breakData);
         }
 
-        // 休憩情報を追加
-        if (!empty($breakInfo)) {
-            $requestData['break_info'] = $breakInfo;
+        // 休憩2の処理
+        if ($request->break2_start_time) {
+            $startTime = $request->break2_start_time;
+            // 時間のみの形式（HH:MM）の場合は:00を追加
+            if (preg_match('/^\d{1,2}:\d{2}$/', $startTime)) {
+                $startTime .= ':00';
+            }
+
+            $breakData = [
+                'attendance_id' => $attendance->id,
+                'start_time' => $date . ' ' . $startTime,
+            ];
+
+            if ($request->break2_end_time) {
+                $endTime = $request->break2_end_time;
+                // 時間のみの形式（HH:MM）の場合は:00を追加
+                if (preg_match('/^\d{1,2}:\d{2}$/', $endTime)) {
+                    $endTime .= ':00';
+                }
+                $breakData['end_time'] = $date . ' ' . $endTime;
+            }
+            Breaktime::create($breakData);
+        }
+    }
+
+    /**
+     * 指定した日付で休憩時間を更新
+     */
+    private function updateBreakTimesWithDate($attendance, $request, $date)
+    {
+        // 既存の休憩時間を削除
+        $attendance->breaks()->delete();
+
+        // 休憩1の処理
+        if ($request->break1_start_time) {
+            $startTime = $request->break1_start_time;
+            // 時間のみの形式（HH:MM）の場合は:00を追加
+            if (preg_match('/^\d{1,2}:\d{2}$/', $startTime)) {
+                $startTime .= ':00';
+            }
+
+            $breakData = [
+                'attendance_id' => $attendance->id,
+                'start_time' => $date . ' ' . $startTime,
+            ];
+
+            if ($request->break1_end_time) {
+                $endTime = $request->break1_end_time;
+                // 時間のみの形式（HH:MM）の場合は:00を追加
+                if (preg_match('/^\d{1,2}:\d{2}$/', $endTime)) {
+                    $endTime .= ':00';
+                }
+                $breakData['end_time'] = $date . ' ' . $endTime;
+            }
+            Breaktime::create($breakData);
         }
 
-        // 勤怠申請を作成
-        $attendanceRequest = AttendanceRequestModel::create($requestData);
+        // 休憩2の処理
+        if ($request->break2_start_time) {
+            $startTime = $request->break2_start_time;
+            // 時間のみの形式（HH:MM）の場合は:00を追加
+            if (preg_match('/^\d{1,2}:\d{2}$/', $startTime)) {
+                $startTime .= ':00';
+            }
 
-        return redirect()->route('user.attendance.list')->with('success', '新規作成申請を送信しました。承認をお待ちください。');
+            $breakData = [
+                'attendance_id' => $attendance->id,
+                'start_time' => $date . ' ' . $startTime,
+            ];
+
+            if ($request->break2_end_time) {
+                $endTime = $request->break2_end_time;
+                // 時間のみの形式（HH:MM）の場合は:00を追加
+                if (preg_match('/^\d{1,2}:\d{2}$/', $endTime)) {
+                    $endTime .= ':00';
+                }
+                $breakData['end_time'] = $date . ' ' . $endTime;
+            }
+            Breaktime::create($breakData);
+        }
     }
 
     /**

@@ -9,13 +9,13 @@
                 @if($todayAttendance)
                 @switch($todayAttendance->status)
                 @case('working')
-                勤務中
+                出勤中
                 @break
                 @case('break')
                 休憩中
                 @break
                 @case('completed')
-                退勤済み
+                退勤済
                 @break
                 @default
                 勤務外

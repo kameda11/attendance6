@@ -46,7 +46,7 @@ class AdminController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'メールアドレスまたはパスワードが正しくありません。',
+            'email' => 'メールアドレスまたはパスワードが正しくありません',
         ])->onlyInput('email');
     }
 
@@ -146,10 +146,18 @@ class AdminController extends Controller
         // 全ユーザーを取得（勤怠データがないユーザーも含める）
         $allUsers = User::orderBy('name', 'asc')->get();
 
+        // 承認済みの申請データも取得
+        $approvedAttendanceRequests = AttendanceRequestModel::where('status', 'approved')
+            ->where('target_date', $selectedDate->format('Y-m-d'))
+            ->get();
+
         // 勤怠データがないユーザーも含めて配列を作成
         $allAttendanceData = [];
         foreach ($allUsers as $user) {
             $attendance = $attendances->where('user_id', $user->id)->first();
+
+            // 承認済みの申請データを取得
+            $approvedRequest = $approvedAttendanceRequests->where('user_id', $user->id)->first();
 
             // 休憩時間を計算
             $breakTime = '';
@@ -158,6 +166,35 @@ class AdminController extends Controller
                 foreach ($attendance->breaks as $break) {
                     if ($break->start_time && $break->end_time) {
                         $totalBreakMinutes += $break->start_time->diffInMinutes($break->end_time);
+                    }
+                }
+                $hours = floor($totalBreakMinutes / 60);
+                $remainingMinutes = $totalBreakMinutes % 60;
+                $breakTime = sprintf('%02d:%02d', $hours, $remainingMinutes);
+            } elseif ($approvedRequest && $approvedRequest->break_info) {
+                // 承認済み申請の休憩時間を計算
+                $totalBreakMinutes = 0;
+                foreach ($approvedRequest->break_info as $breakInfo) {
+                    if (isset($breakInfo['start_time']) && isset($breakInfo['end_time'])) {
+                        try {
+                            $startTimeStr = $breakInfo['start_time'];
+                            $endTimeStr = $breakInfo['end_time'];
+
+                            // 時間のみの形式（HH:MM）の場合
+                            if (preg_match('/^\d{1,2}:\d{2}$/', $startTimeStr) && preg_match('/^\d{1,2}:\d{2}$/', $endTimeStr)) {
+                                $startTime = Carbon::createFromFormat('H:i', $startTimeStr);
+                                $endTime = Carbon::createFromFormat('H:i', $endTimeStr);
+                            } else {
+                                // 日時形式の場合
+                                $startTime = Carbon::parse($startTimeStr);
+                                $endTime = Carbon::parse($endTimeStr);
+                            }
+
+                            $totalBreakMinutes += $startTime->diffInMinutes($endTime);
+                        } catch (\Exception $e) {
+                            // 解析に失敗した場合はスキップ
+                            continue;
+                        }
                     }
                 }
                 $hours = floor($totalBreakMinutes / 60);
@@ -186,11 +223,50 @@ class AdminController extends Controller
                 $hours = floor($totalMinutes / 60);
                 $minutes = $totalMinutes % 60;
                 $workTime = sprintf('%02d:%02d', $hours, $minutes);
+            } elseif ($approvedRequest && $approvedRequest->clock_in_time && $approvedRequest->clock_out_time) {
+                // 承認済み申請の勤務時間を計算
+                $clockIn = Carbon::parse($approvedRequest->clock_in_time);
+                $clockOut = Carbon::parse($approvedRequest->clock_out_time);
+                $totalMinutes = $clockOut->diffInMinutes($clockIn);
+
+                // 承認済み申請の休憩時間を差し引く
+                if ($approvedRequest->break_info) {
+                    $totalBreakMinutes = 0;
+                    foreach ($approvedRequest->break_info as $breakInfo) {
+                        if (isset($breakInfo['start_time']) && isset($breakInfo['end_time'])) {
+                            try {
+                                $startTimeStr = $breakInfo['start_time'];
+                                $endTimeStr = $breakInfo['end_time'];
+
+                                // 時間のみの形式（HH:MM）の場合
+                                if (preg_match('/^\d{1,2}:\d{2}$/', $startTimeStr) && preg_match('/^\d{1,2}:\d{2}$/', $endTimeStr)) {
+                                    $startTime = Carbon::createFromFormat('H:i', $startTimeStr);
+                                    $endTime = Carbon::createFromFormat('H:i', $endTimeStr);
+                                } else {
+                                    // 日時形式の場合
+                                    $startTime = Carbon::parse($startTimeStr);
+                                    $endTime = Carbon::parse($endTimeStr);
+                                }
+
+                                $totalBreakMinutes += $startTime->diffInMinutes($endTime);
+                            } catch (\Exception $e) {
+                                // 解析に失敗した場合はスキップ
+                                continue;
+                            }
+                        }
+                    }
+                    $totalMinutes -= $totalBreakMinutes;
+                }
+
+                $hours = floor($totalMinutes / 60);
+                $minutes = $totalMinutes % 60;
+                $workTime = sprintf('%02d:%02d', $hours, $minutes);
             }
 
             $allAttendanceData[] = [
                 'user' => $user,
                 'attendance' => $attendance,
+                'approvedRequest' => $approvedRequest,
                 'breakTime' => $breakTime,
                 'workTime' => $workTime
             ];
@@ -350,7 +426,7 @@ class AdminController extends Controller
         // 申請情報を承認状態に更新
         $this->approvePendingRequests($attendance->user_id, $date);
 
-        return redirect()->route('admin.attendances')->with('success', '勤怠情報を更新しました。');
+        return redirect()->route('admin.attendances');
     }
 
     /**
@@ -394,7 +470,7 @@ class AdminController extends Controller
         // 申請情報を承認状態に更新
         $this->approvePendingRequests($attendance->user_id, $date);
 
-        return redirect()->route('admin.attendances')->with('success', '勤怠情報を作成しました。');
+        return redirect()->route('admin.attendances');
     }
 
     /**
@@ -458,7 +534,7 @@ class AdminController extends Controller
         $attendanceRequest = AttendanceRequestModel::findOrFail($id);
 
         if ($attendanceRequest->status !== 'pending') {
-            return back()->withErrors(['general' => 'この申請は既に処理済みです。']);
+            return back()->withErrors(['general' => 'この申請は既に処理済みです']);
         }
 
         // 承認処理
@@ -499,8 +575,7 @@ class AdminController extends Controller
             $this->processBreakRequestsAfterApproval($attendance, $attendanceRequest);
         }
 
-        return redirect()->route('admin.attendance.requests')
-            ->with('success', '申請を承認しました。');
+        return redirect()->route('admin.attendance.requests');
     }
     /**
      * スタッフ別勤怠一覧を表示
@@ -545,6 +620,15 @@ class AdminController extends Controller
                 }
             });
 
+        // その月の承認済み申請データを取得
+        $attendanceRequests = AttendanceRequestModel::where('user_id', $userId)
+            ->where('status', 'approved')
+            ->whereBetween('target_date', [$currentMonth->format('Y-m-d'), $currentMonth->copy()->endOfMonth()->format('Y-m-d')])
+            ->get()
+            ->keyBy(function ($request) {
+                return $request->target_date->format('Y-m-d');
+            });
+
         // カレンダー配列を作成
         $calendar = [];
         $daysInMonth = $currentMonth->daysInMonth;
@@ -553,29 +637,57 @@ class AdminController extends Controller
             $date = Carbon::create($year, $month, $day);
             $dateKey = $date->format('Y-m-d');
             $attendance = $attendances->get($dateKey);
+            $attendanceRequest = $attendanceRequests->get($dateKey);
 
-            // 休憩時間を計算
+            // 休憩時間と勤務時間を計算
             $breakTime = '';
-            if ($attendance && $attendance->breaks->isNotEmpty()) {
-                $totalBreakMinutes = 0;
-                foreach ($attendance->breaks as $break) {
-                    if ($break->start_time && $break->end_time) {
-                        $totalBreakMinutes += $break->start_time->diffInMinutes($break->end_time);
-                    }
-                }
-                $hours = floor($totalBreakMinutes / 60);
-                $remainingMinutes = $totalBreakMinutes % 60;
-                $breakTime = sprintf('%02d:%02d', $hours, $remainingMinutes);
-            }
-
-            // 勤務時間を計算
             $workTime = '';
-            if ($attendance && $attendance->clock_in_time && $attendance->clock_out_time) {
-                $clockIn = Carbon::parse($attendance->clock_in_time);
-                $clockOut = Carbon::parse($attendance->clock_out_time);
-                $totalMinutes = $clockOut->diffInMinutes($clockIn);
 
-                // 休憩時間を差し引く
+            // 承認済み申請データを優先して処理
+            if ($attendanceRequest) {
+                if ($attendanceRequest->clock_in_time && $attendanceRequest->clock_out_time) {
+                    $clockIn = Carbon::parse($attendanceRequest->clock_in_time);
+                    $clockOut = Carbon::parse($attendanceRequest->clock_out_time);
+                    $totalMinutes = $clockOut->diffInMinutes($clockIn);
+
+                    // 申請の休憩データを処理
+                    if ($attendanceRequest->break_info) {
+                        $totalBreakMinutes = 0;
+                        foreach ($attendanceRequest->break_info as $breakInfo) {
+                            if (isset($breakInfo['start_time']) && isset($breakInfo['end_time'])) {
+                                try {
+                                    $startTimeStr = $breakInfo['start_time'];
+                                    $endTimeStr = $breakInfo['end_time'];
+
+                                    // 時間のみの形式（HH:MM）の場合
+                                    if (preg_match('/^\d{1,2}:\d{2}$/', $startTimeStr) && preg_match('/^\d{1,2}:\d{2}$/', $endTimeStr)) {
+                                        $startTime = Carbon::createFromFormat('H:i', $startTimeStr);
+                                        $endTime = Carbon::createFromFormat('H:i', $endTimeStr);
+                                    } else {
+                                        // 日時形式の場合
+                                        $startTime = Carbon::parse($startTimeStr);
+                                        $endTime = Carbon::parse($endTimeStr);
+                                    }
+
+                                    $totalBreakMinutes += $startTime->diffInMinutes($endTime);
+                                } catch (\Exception $e) {
+                                    // 解析に失敗した場合はスキップ
+                                    continue;
+                                }
+                            }
+                        }
+                        $totalMinutes -= $totalBreakMinutes;
+                        $hours = floor($totalBreakMinutes / 60);
+                        $remainingMinutes = $totalBreakMinutes % 60;
+                        $breakTime = sprintf('%02d:%02d', $hours, $remainingMinutes);
+                    }
+
+                    $hours = floor($totalMinutes / 60);
+                    $minutes = $totalMinutes % 60;
+                    $workTime = sprintf('%02d:%02d', $hours, $minutes);
+                }
+            } elseif ($attendance) {
+                // 実際の勤怠データがある場合
                 if ($attendance->breaks->isNotEmpty()) {
                     $totalBreakMinutes = 0;
                     foreach ($attendance->breaks as $break) {
@@ -583,12 +695,31 @@ class AdminController extends Controller
                             $totalBreakMinutes += $break->start_time->diffInMinutes($break->end_time);
                         }
                     }
-                    $totalMinutes -= $totalBreakMinutes;
+                    $hours = floor($totalBreakMinutes / 60);
+                    $remainingMinutes = $totalBreakMinutes % 60;
+                    $breakTime = sprintf('%02d:%02d', $hours, $remainingMinutes);
                 }
 
-                $hours = floor($totalMinutes / 60);
-                $minutes = $totalMinutes % 60;
-                $workTime = sprintf('%02d:%02d', $hours, $minutes);
+                if ($attendance->clock_in_time && $attendance->clock_out_time) {
+                    $clockIn = Carbon::parse($attendance->clock_in_time);
+                    $clockOut = Carbon::parse($attendance->clock_out_time);
+                    $totalMinutes = $clockOut->diffInMinutes($clockIn);
+
+                    // 休憩時間を差し引く
+                    if ($attendance->breaks->isNotEmpty()) {
+                        $totalBreakMinutes = 0;
+                        foreach ($attendance->breaks as $break) {
+                            if ($break->start_time && $break->end_time) {
+                                $totalBreakMinutes += $break->start_time->diffInMinutes($break->end_time);
+                            }
+                        }
+                        $totalMinutes -= $totalBreakMinutes;
+                    }
+
+                    $hours = floor($totalMinutes / 60);
+                    $minutes = $totalMinutes % 60;
+                    $workTime = sprintf('%02d:%02d', $hours, $minutes);
+                }
             }
 
             $calendar[] = [
@@ -596,6 +727,7 @@ class AdminController extends Controller
                 'weekday' => $this->getJapaneseWeekday($date->dayOfWeek),
                 'date' => $date->format('Y-m-d'),
                 'attendance' => $attendance,
+                'attendanceRequest' => $attendanceRequest,
                 'attendance_id' => $attendance ? $attendance->id : 0,
                 'breakTime' => $breakTime,
                 'workTime' => $workTime,
@@ -646,6 +778,15 @@ class AdminController extends Controller
                 }
             });
 
+        // その月の承認済み申請データを取得
+        $attendanceRequests = AttendanceRequestModel::where('user_id', $userId)
+            ->where('status', 'approved')
+            ->whereBetween('target_date', [$currentMonth->format('Y-m-d'), $currentMonth->copy()->endOfMonth()->format('Y-m-d')])
+            ->get()
+            ->keyBy(function ($request) {
+                return $request->target_date->format('Y-m-d');
+            });
+
         // CSVデータを準備
         $csvData = [];
         $csvData[] = ['日付', '曜日', '出勤時間', '退勤時間', '休憩時間', '勤務時間', '備考'];
@@ -656,29 +797,57 @@ class AdminController extends Controller
             $date = Carbon::create($year, $month, $day);
             $dateKey = $date->format('Y-m-d');
             $attendance = $attendances->get($dateKey);
+            $attendanceRequest = $attendanceRequests->get($dateKey);
 
-            // 休憩時間を計算
+            // 休憩時間と勤務時間を計算
             $breakTime = '';
-            if ($attendance && $attendance->breaks->isNotEmpty()) {
-                $totalBreakMinutes = 0;
-                foreach ($attendance->breaks as $break) {
-                    if ($break->start_time && $break->end_time) {
-                        $totalBreakMinutes += $break->start_time->diffInMinutes($break->end_time);
-                    }
-                }
-                $hours = floor($totalBreakMinutes / 60);
-                $remainingMinutes = $totalBreakMinutes % 60;
-                $breakTime = sprintf('%02d:%02d', $hours, $remainingMinutes);
-            }
-
-            // 勤務時間を計算
             $workTime = '';
-            if ($attendance && $attendance->clock_in_time && $attendance->clock_out_time) {
-                $clockIn = Carbon::parse($attendance->clock_in_time);
-                $clockOut = Carbon::parse($attendance->clock_out_time);
-                $totalMinutes = $clockOut->diffInMinutes($clockIn);
 
-                // 休憩時間を差し引く
+            // 承認済み申請データを優先して処理
+            if ($attendanceRequest) {
+                if ($attendanceRequest->clock_in_time && $attendanceRequest->clock_out_time) {
+                    $clockIn = Carbon::parse($attendanceRequest->clock_in_time);
+                    $clockOut = Carbon::parse($attendanceRequest->clock_out_time);
+                    $totalMinutes = $clockOut->diffInMinutes($clockIn);
+
+                    // 申請の休憩データを処理
+                    if ($attendanceRequest->break_info) {
+                        $totalBreakMinutes = 0;
+                        foreach ($attendanceRequest->break_info as $breakInfo) {
+                            if (isset($breakInfo['start_time']) && isset($breakInfo['end_time'])) {
+                                try {
+                                    $startTimeStr = $breakInfo['start_time'];
+                                    $endTimeStr = $breakInfo['end_time'];
+
+                                    // 時間のみの形式（HH:MM）の場合
+                                    if (preg_match('/^\d{1,2}:\d{2}$/', $startTimeStr) && preg_match('/^\d{1,2}:\d{2}$/', $endTimeStr)) {
+                                        $startTime = Carbon::createFromFormat('H:i', $startTimeStr);
+                                        $endTime = Carbon::createFromFormat('H:i', $endTimeStr);
+                                    } else {
+                                        // 日時形式の場合
+                                        $startTime = Carbon::parse($startTimeStr);
+                                        $endTime = Carbon::parse($endTimeStr);
+                                    }
+
+                                    $totalBreakMinutes += $startTime->diffInMinutes($endTime);
+                                } catch (\Exception $e) {
+                                    // 解析に失敗した場合はスキップ
+                                    continue;
+                                }
+                            }
+                        }
+                        $totalMinutes -= $totalBreakMinutes;
+                        $hours = floor($totalBreakMinutes / 60);
+                        $remainingMinutes = $totalBreakMinutes % 60;
+                        $breakTime = sprintf('%02d:%02d', $hours, $remainingMinutes);
+                    }
+
+                    $hours = floor($totalMinutes / 60);
+                    $minutes = $totalMinutes % 60;
+                    $workTime = sprintf('%02d:%02d', $hours, $minutes);
+                }
+            } elseif ($attendance) {
+                // 実際の勤怠データがある場合
                 if ($attendance->breaks->isNotEmpty()) {
                     $totalBreakMinutes = 0;
                     foreach ($attendance->breaks as $break) {
@@ -686,22 +855,41 @@ class AdminController extends Controller
                             $totalBreakMinutes += $break->start_time->diffInMinutes($break->end_time);
                         }
                     }
-                    $totalMinutes -= $totalBreakMinutes;
+                    $hours = floor($totalBreakMinutes / 60);
+                    $remainingMinutes = $totalBreakMinutes % 60;
+                    $breakTime = sprintf('%02d:%02d', $hours, $remainingMinutes);
                 }
 
-                $hours = floor($totalMinutes / 60);
-                $minutes = $totalMinutes % 60;
-                $workTime = sprintf('%02d:%02d', $hours, $minutes);
+                if ($attendance->clock_in_time && $attendance->clock_out_time) {
+                    $clockIn = Carbon::parse($attendance->clock_in_time);
+                    $clockOut = Carbon::parse($attendance->clock_out_time);
+                    $totalMinutes = $clockOut->diffInMinutes($clockIn);
+
+                    // 休憩時間を差し引く
+                    if ($attendance->breaks->isNotEmpty()) {
+                        $totalBreakMinutes = 0;
+                        foreach ($attendance->breaks as $break) {
+                            if ($break->start_time && $break->end_time) {
+                                $totalBreakMinutes += $break->start_time->diffInMinutes($break->end_time);
+                            }
+                        }
+                        $totalMinutes -= $totalBreakMinutes;
+                    }
+
+                    $hours = floor($totalMinutes / 60);
+                    $minutes = $totalMinutes % 60;
+                    $workTime = sprintf('%02d:%02d', $hours, $minutes);
+                }
             }
 
             $csvData[] = [
                 $date->format('m/d'),
                 $this->getJapaneseWeekday($date->dayOfWeek),
-                $attendance && $attendance->clock_in_time ? $attendance->clock_in_time->format('H:i') : '',
-                $attendance && $attendance->clock_out_time ? $attendance->clock_out_time->format('H:i') : '',
+                $attendanceRequest ? ($attendanceRequest->clock_in_time ? Carbon::parse($attendanceRequest->clock_in_time)->format('H:i') : '') : ($attendance && $attendance->clock_in_time ? $attendance->clock_in_time->format('H:i') : ''),
+                $attendanceRequest ? ($attendanceRequest->clock_out_time ? Carbon::parse($attendanceRequest->clock_out_time)->format('H:i') : '') : ($attendance && $attendance->clock_out_time ? $attendance->clock_out_time->format('H:i') : ''),
                 $breakTime,
                 $workTime,
-                '' // 備考欄（必要に応じて追加）
+                $attendanceRequest ? ($attendanceRequest->notes ?? '') : ($attendance ? ($attendance->notes ?? '') : '') // 備考欄
             ];
         }
 
@@ -744,24 +932,48 @@ class AdminController extends Controller
 
         // 休憩1の処理
         if ($request->break1_start_time) {
+            $startTime = $request->break1_start_time;
+            // 時間のみの形式（HH:MM）の場合は:00を追加
+            if (preg_match('/^\d{1,2}:\d{2}$/', $startTime)) {
+                $startTime .= ':00';
+            }
+
             $breakData = [
                 'attendance_id' => $attendance->id,
-                'start_time' => $date . ' ' . $request->break1_start_time . ':00',
+                'start_time' => $date . ' ' . $startTime,
             ];
+
             if ($request->break1_end_time) {
-                $breakData['end_time'] = $date . ' ' . $request->break1_end_time . ':00';
+                $endTime = $request->break1_end_time;
+                // 時間のみの形式（HH:MM）の場合は:00を追加
+                if (preg_match('/^\d{1,2}:\d{2}$/', $endTime)) {
+                    $endTime .= ':00';
+                }
+                $breakData['end_time'] = $date . ' ' . $endTime;
             }
             Breaktime::create($breakData);
         }
 
         // 休憩2の処理
         if ($request->break2_start_time) {
+            $startTime = $request->break2_start_time;
+            // 時間のみの形式（HH:MM）の場合は:00を追加
+            if (preg_match('/^\d{1,2}:\d{2}$/', $startTime)) {
+                $startTime .= ':00';
+            }
+
             $breakData = [
                 'attendance_id' => $attendance->id,
-                'start_time' => $date . ' ' . $request->break2_start_time . ':00',
+                'start_time' => $date . ' ' . $startTime,
             ];
+
             if ($request->break2_end_time) {
-                $breakData['end_time'] = $date . ' ' . $request->break2_end_time . ':00';
+                $endTime = $request->break2_end_time;
+                // 時間のみの形式（HH:MM）の場合は:00を追加
+                if (preg_match('/^\d{1,2}:\d{2}$/', $endTime)) {
+                    $endTime .= ':00';
+                }
+                $breakData['end_time'] = $date . ' ' . $endTime;
             }
             Breaktime::create($breakData);
         }
@@ -777,24 +989,48 @@ class AdminController extends Controller
 
         // 休憩1の処理
         if ($request->break1_start_time) {
+            $startTime = $request->break1_start_time;
+            // 時間のみの形式（HH:MM）の場合は:00を追加
+            if (preg_match('/^\d{1,2}:\d{2}$/', $startTime)) {
+                $startTime .= ':00';
+            }
+
             $breakData = [
                 'attendance_id' => $attendance->id,
-                'start_time' => $date . ' ' . $request->break1_start_time . ':00',
+                'start_time' => $date . ' ' . $startTime,
             ];
+
             if ($request->break1_end_time) {
-                $breakData['end_time'] = $date . ' ' . $request->break1_end_time . ':00';
+                $endTime = $request->break1_end_time;
+                // 時間のみの形式（HH:MM）の場合は:00を追加
+                if (preg_match('/^\d{1,2}:\d{2}$/', $endTime)) {
+                    $endTime .= ':00';
+                }
+                $breakData['end_time'] = $date . ' ' . $endTime;
             }
             Breaktime::create($breakData);
         }
 
         // 休憩2の処理
         if ($request->break2_start_time) {
+            $startTime = $request->break2_start_time;
+            // 時間のみの形式（HH:MM）の場合は:00を追加
+            if (preg_match('/^\d{1,2}:\d{2}$/', $startTime)) {
+                $startTime .= ':00';
+            }
+
             $breakData = [
                 'attendance_id' => $attendance->id,
-                'start_time' => $date . ' ' . $request->break2_start_time . ':00',
+                'start_time' => $date . ' ' . $startTime,
             ];
+
             if ($request->break2_end_time) {
-                $breakData['end_time'] = $date . ' ' . $request->break2_end_time . ':00';
+                $endTime = $request->break2_end_time;
+                // 時間のみの形式（HH:MM）の場合は:00を追加
+                if (preg_match('/^\d{1,2}:\d{2}$/', $endTime)) {
+                    $endTime .= ':00';
+                }
+                $breakData['end_time'] = $date . ' ' . $endTime;
             }
             Breaktime::create($breakData);
         }
@@ -868,10 +1104,26 @@ class AdminController extends Controller
                 ];
 
                 if (isset($breakInfo['start_time'])) {
-                    $breakData['start_time'] = $attendanceRequest->target_date . ' ' . $breakInfo['start_time'] . ':00';
+                    // 時間形式をチェックして適切に処理
+                    $startTimeStr = $breakInfo['start_time'];
+                    if (preg_match('/^\d{1,2}:\d{2}$/', $startTimeStr)) {
+                        // 時間のみの形式（HH:MM）の場合
+                        $breakData['start_time'] = $attendanceRequest->target_date . ' ' . $startTimeStr . ':00';
+                    } else {
+                        // 既に日時形式の場合
+                        $breakData['start_time'] = $startTimeStr;
+                    }
                 }
                 if (isset($breakInfo['end_time'])) {
-                    $breakData['end_time'] = $attendanceRequest->target_date . ' ' . $breakInfo['end_time'] . ':00';
+                    // 時間形式をチェックして適切に処理
+                    $endTimeStr = $breakInfo['end_time'];
+                    if (preg_match('/^\d{1,2}:\d{2}$/', $endTimeStr)) {
+                        // 時間のみの形式（HH:MM）の場合
+                        $breakData['end_time'] = $attendanceRequest->target_date . ' ' . $endTimeStr . ':00';
+                    } else {
+                        // 既に日時形式の場合
+                        $breakData['end_time'] = $endTimeStr;
+                    }
                 }
 
                 Breaktime::create($breakData);
@@ -902,7 +1154,6 @@ class AdminController extends Controller
                 if ($breakRequest->end_time) {
                     $updateData['end_time'] = $breakRequest->target_date . ' ' . $breakRequest->end_time;
                 }
-
 
                 $breakRequest->break->update($updateData);
             }

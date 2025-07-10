@@ -21,7 +21,7 @@ class AttendanceFormRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'clock_in_time' => 'nullable|regex:/^[0-9]{1,2}:[0-9]{2}$/',
             'clock_out_time' => 'nullable|regex:/^[0-9]{1,2}:[0-9]{2}$/',
             'break1_start_time' => 'nullable|regex:/^[0-9]{1,2}:[0-9]{2}$/',
@@ -31,6 +31,13 @@ class AttendanceFormRequest extends FormRequest
             'notes' => 'required|string|max:255',
             'date' => 'required|date',
         ];
+
+        // 管理者の新規作成時のみuser_idを必須にする（一般ユーザーは不要）
+        if ($this->isMethod('POST') && $this->has('user_id')) {
+            $rules['user_id'] = 'required|exists:users,id';
+        }
+
+        return $rules;
     }
 
     /**

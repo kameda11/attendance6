@@ -66,19 +66,33 @@
                 </thead>
                 <tbody>
                     @forelse($allAttendanceData as $data)
-                    <tr class="{{ $data['attendance'] ? 'has-attendance' : 'no-attendance' }}">
+                    <tr class="{{ $data['attendance'] ? 'has-attendance' : ($data['approvedRequest'] ? 'has-approved-request' : 'no-attendance') }}">
                         <td class="user-name">
                             <div class="user-info">
                                 <span class="name">{{ $data['user']->name }}</span>
                             </div>
                         </td>
-                        <td>{{ $data['attendance'] && $data['attendance']->clock_in_time ? $data['attendance']->clock_in_time->format('H:i') : '' }}</td>
-                        <td>{{ $data['attendance'] && $data['attendance']->clock_out_time ? $data['attendance']->clock_out_time->format('H:i') : '' }}</td>
+                        <td>
+                            @if($data['attendance'] && $data['attendance']->clock_in_time)
+                            {{ $data['attendance']->clock_in_time->format('H:i') }}
+                            @elseif($data['approvedRequest'] && $data['approvedRequest']->clock_in_time)
+                            {{ $data['approvedRequest']->clock_in_time->format('H:i') }}
+                            @endif
+                        </td>
+                        <td>
+                            @if($data['attendance'] && $data['attendance']->clock_out_time)
+                            {{ $data['attendance']->clock_out_time->format('H:i') }}
+                            @elseif($data['approvedRequest'] && $data['approvedRequest']->clock_out_time)
+                            {{ $data['approvedRequest']->clock_out_time->format('H:i') }}
+                            @endif
+                        </td>
                         <td>{{ $data['breakTime'] }}</td>
                         <td>{{ $data['workTime'] }}</td>
                         <td>
                             @if($data['attendance'])
                             <a href="{{ route('admin.attendance.detail', ['id' => $data['attendance']->id]) }}" class="action-button detail">詳細</a>
+                            @elseif($data['approvedRequest'])
+                            <a href="{{ route('admin.attendance.detail', ['id' => 0, 'user_id' => $data['user']->id, 'date' => $selectedDate->format('Y-m-d')]) }}" class="action-button detail">詳細</a>
                             @else
                             <a href="{{ route('admin.attendance.detail', ['id' => 0, 'user_id' => $data['user']->id, 'date' => $selectedDate->format('Y-m-d')]) }}" class="action-button detail">詳細</a>
                             @endif
