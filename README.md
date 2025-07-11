@@ -1,7 +1,7 @@
 # 勤怠管理アプリ
 ## 環境構築
 **Dockerビルド**
-1. `git clone git@github.com:kameda11/attendance5.git`
+1. `git clone git@github.com:kameda11/attendance6.git`
 2. DockerDesktopアプリを立ち上げる
 3. `docker-compose up -d --build`
 
