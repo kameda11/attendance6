@@ -27,7 +27,6 @@
         </div>
     </div>
 
-    <!-- 日時情報 -->
     <div class="attendance-info">
         <div class="date-time-info">
             <div class="date-display">
@@ -39,7 +38,6 @@
         </div>
     </div>
 
-    <!-- 勤務管理ボタン -->
     <div class="attendance-buttons">
         <div class="button-group">
             @if(!$todayAttendance)
@@ -75,7 +73,6 @@
 
 @section('script')
 <script>
-    // 時刻をリアルタイムで更新
     function updateTime() {
         const now = new Date();
         const timeElement = document.getElementById('currentTime');
@@ -87,7 +84,6 @@
             minute: '2-digit'
         });
 
-        // 曜日の日本語表記
         const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
         const weekday = weekdays[now.getDay()];
 
@@ -98,7 +94,6 @@
         }) + `(${weekday})`;
     }
 
-    // 出勤処理
     function clockIn() {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         if (!csrfToken) {
@@ -121,7 +116,7 @@
             })
             .then(data => {
                 if (data.success) {
-                    location.reload(); // ページをリロードして最新の状態を反映
+                    location.reload();
                 }
             })
             .catch(error => {
@@ -129,7 +124,6 @@
             });
     }
 
-    // 退勤処理
     function clockOut() {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         if (!csrfToken) {
@@ -152,7 +146,7 @@
             })
             .then(data => {
                 if (data.success) {
-                    location.reload(); // ページをリロードして最新の状態を反映
+                    location.reload();
                 }
             })
             .catch(error => {
@@ -160,7 +154,6 @@
             });
     }
 
-    // 休憩開始処理
     function breakStart() {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         if (!csrfToken) {
@@ -183,7 +176,7 @@
             })
             .then(data => {
                 if (data.success) {
-                    location.reload(); // ページをリロードして最新の状態を反映
+                    location.reload();
                 }
             })
             .catch(error => {
@@ -191,7 +184,6 @@
             });
     }
 
-    // 休憩終了処理
     function breakEnd() {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         if (!csrfToken) {
@@ -214,7 +206,7 @@
             })
             .then(data => {
                 if (data.success) {
-                    location.reload(); // ページをリロードして最新の状態を反映
+                    location.reload();
                 }
             })
             .catch(error => {
@@ -222,12 +214,10 @@
             });
     }
 
-    // お疲れさまでした処理
     function goodbye() {
-        clockOut(); // 退勤処理を実行
+        clockOut();
     }
 
-    // ページ読み込み時に時刻更新を開始
     updateTime();
     setInterval(updateTime, 1000);
 </script>

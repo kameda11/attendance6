@@ -13,8 +13,6 @@ class CreateAttendancesTable extends Migration
      */
     public function up()
     {
-
-        // 新しいテーブルを作成
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade')->nullable();
@@ -23,9 +21,6 @@ class CreateAttendancesTable extends Migration
             $table->text('notes')->nullable();
             $table->enum('status', ['working', 'break', 'completed'])->default('working');
             $table->timestamps();
-
-            // 開発・テスト用のため、ユニーク制約は一時的に削除
-            // 本番環境では適切な制約を追加することを推奨
         });
     }
 

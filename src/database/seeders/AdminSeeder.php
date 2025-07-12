@@ -31,9 +31,7 @@ class AdminSeeder extends Seeder
         ];
 
         foreach ($admins as $adminData) {
-            // 既に同じメールアドレスの管理者が存在するかチェック
             $existingAdmin = Admin::where('email', $adminData['email'])->first();
-
             if (!$existingAdmin) {
                 Admin::create($adminData);
             }

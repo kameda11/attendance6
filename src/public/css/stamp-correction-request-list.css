@@ -1,5 +1,3 @@
-/* stamp-correction-request-list.css */
-
 .admin-requests-container {
     margin: 0 auto;
     padding: 20px 150px;
@@ -135,7 +133,6 @@
     padding: 40px 20px;
 }
 
-/* PC (1400-1540px) */
 @media screen and (max-width: 1540px) and (min-width: 1400px) {
     .admin-requests-container {
         padding: 40px 150px;
@@ -166,7 +163,6 @@
     }
 }
 
-/* タブレット (768-850px) */
 @media screen and (max-width: 850px) and (min-width: 768px) {
     .admin-requests-container {
         padding: 30px;

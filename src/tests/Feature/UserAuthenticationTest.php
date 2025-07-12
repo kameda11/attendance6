@@ -5,19 +5,13 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Auth\Notifications\VerifyEmail;
 use App\Models\User;
 use Tests\TestCase;
-use Illuminate\Support\Facades\URL;
 
 class UserAuthenticationTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    /**
-     * 名前未入力で会員登録した場合のバリデーションメッセージをテスト
-     */
     public function test_register_validation_message_for_missing_name()
     {
         $response = $this->post('/register', [
@@ -32,9 +26,6 @@ class UserAuthenticationTest extends TestCase
         ]);
     }
 
-    /**
-     * メールアドレス未入力で会員登録した場合のバリデーションメッセージをテスト
-     */
     public function test_register_validation_message_for_missing_email()
     {
         $response = $this->post('/register', [
@@ -49,9 +40,6 @@ class UserAuthenticationTest extends TestCase
         ]);
     }
 
-    /**
-     * パスワードが8文字未満で会員登録した場合のバリデーションメッセージをテスト
-     */
     public function test_register_validation_message_for_short_password()
     {
         $response = $this->post('/register', [
@@ -66,9 +54,6 @@ class UserAuthenticationTest extends TestCase
         ]);
     }
 
-    /**
-     * パスワードとパスワード確認が一致しない場合のバリデーションメッセージをテスト 
-     */
     public function test_register_validation_message_for_password_confirmation()
     {
         $response = $this->post('/register', [
@@ -83,9 +68,7 @@ class UserAuthenticationTest extends TestCase
         ]);
     }
 
-    /**
-     * 有効なユーザー情報で会員登録が成功し、データベースに保存されることをテスト
-     */
+
     public function test_user_can_register_with_valid_data()
     {
         $userData = [

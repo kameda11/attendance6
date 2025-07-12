@@ -79,9 +79,7 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $userData) {
-            // 既に同じメールアドレスのユーザーが存在するかチェック
             $existingUser = User::where('email', $userData['email'])->first();
-
             if (!$existingUser) {
                 User::create($userData);
             }

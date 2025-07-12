@@ -6,32 +6,19 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
             'email' => ['required', 'string', 'email', 'max:255'],
-            'password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8'],
         ];
     }
 
-    /**
-     * Get custom messages for validator errors.
-     *
-     * @return array
-     */
     public function messages(): array
     {
         return [
@@ -45,11 +32,6 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array
-     */
     public function attributes(): array
     {
         return [
@@ -57,4 +39,4 @@ class LoginRequest extends FormRequest
             'password' => 'パスワード',
         ];
     }
-} 
+}

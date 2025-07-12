@@ -64,7 +64,6 @@
     color: #0073CC;
 }
 
-/* PC (1400-1540px) */
 @media screen and (max-width: 1540px) and (min-width: 1400px) {
     .login-form__content {
         padding: 25px 12px;
@@ -86,7 +85,6 @@
     }
 }
 
-/* タブレット (768-850px) */
 @media screen and (max-width: 850px) and (min-width: 768px) {
     .login-form__content {
         padding: 20px 10px;

@@ -189,7 +189,6 @@ tr:last-child td {
     font-weight: bold;
 }
 
-/* 承認待ち表示用のスタイル */
 .pending-display {
     font-weight: bold;
     color: #000000;
@@ -260,7 +259,6 @@ tr:last-child td {
     margin-top: 5px;
 }
 
-/* PC (1400-1540px) */
 @media screen and (max-width: 1540px) and (min-width: 1400px) {
     .attendance-detail-container {
         padding: 40px 200px;
@@ -319,7 +317,6 @@ tr:last-child td {
     }
 }
 
-/* タブレット (768-850px) */
 @media screen and (max-width: 850px) and (min-width: 768px) {
     .attendance-detail-container {
         padding: 30px 90px;

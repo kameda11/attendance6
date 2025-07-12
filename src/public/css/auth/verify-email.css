@@ -16,7 +16,6 @@
     font-family: Inter;
 }
 
-/* ボタンのスタイリング */
 .verify-email__actions {
     display: flex;
     flex-direction: column;
@@ -68,7 +67,6 @@ form {
     cursor: pointer;
 }
 
-/* PC (1400-1540px) */
 @media screen and (max-width: 1540px) and (min-width: 1400px) {
     .verify-email__message {
         padding: 25px 0;
@@ -92,7 +90,6 @@ form {
     }
 }
 
-/* タブレット (768-850px) */
 @media screen and (max-width: 850px) and (min-width: 768px) {
     .verify-email__content {
         padding: 0 20px;

@@ -33,22 +33,15 @@ class LoginController extends Controller
         return redirect()->route('verification.notice');
     }
 
-    /**
-     * ログインフォームを表示
-     */
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    /**
-     * ログイン処理
-     */
     public function login(LoginRequest $request)
     {
         $credentials = $request->validated();
 
-        // メールアドレスが登録されているかチェック
         $user = User::where('email', $credentials['email'])->first();
         
         if (!$user) {
@@ -68,9 +61,6 @@ class LoginController extends Controller
         ])->onlyInput('email');
     }
 
-    /**
-     * ログアウト処理
-     */
     public function logout(Request $request)
     {
         Auth::logout();

@@ -20,7 +20,6 @@ class CreateBreakRequestsTable extends Migration
             $table->date('target_date');
             $table->enum('request_type', ['create', 'update']);
             $table->enum('status', ['pending', 'approved'])->default('pending');
-
             $table->time('start_time');
             $table->time('end_time')->nullable();
 
@@ -29,7 +28,6 @@ class CreateBreakRequestsTable extends Migration
             $table->unique(['user_id', 'target_date', 'status'], 'unique_break_pending_request');
         });
     }
-
     /**
      * Reverse the migrations.
      *

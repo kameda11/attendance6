@@ -20,99 +20,16 @@
     min-height: calc(100vh - 80px);
 }
 
-/* 管理者用テーブルスタイル */
-.admin-table {
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.admin-table th {
-    background-color: #000000;
-    color: white;
-    padding: 12px;
-    font-weight: bold;
-}
-
-.admin-table td {
-    padding: 12px;
-    border-bottom: 1px solid #dee2e6;
-}
-
-/* 管理者用ボタンスタイル */
-.admin-btn {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.admin-btn-danger {
-    background-color: #dc3545;
-}
-
-.admin-btn-success {
-    background-color: #28a745;
-}
-
-/* 管理者ログイン専用スタイル */
-.admin-login-body {
-    background-color: #f8f9fa;
-    min-height: 100vh;
-}
-
-.admin-login-header {
-    background-color: #343a40;
-    border-bottom: 3px solid #007bff;
-}
-
-.admin-login-main {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: calc(100vh - 80px);
-}
-
-/* PC (1400-1540px) */
 @media screen and (max-width: 1540px) and (min-width: 1400px) {
     .admin-main {
         min-height: calc(100vh - 70px);
     }
-
-    .admin-table th,
-    .admin-table td {
-        padding: 10px;
-        font-size: 14px;
-    }
-
-    .admin-btn {
-        padding: 6px 14px;
-        font-size: 14px;
-    }
 }
 
-/* タブレット (768-850px) */
 @media screen and (max-width: 850px) and (min-width: 768px) {
     .admin-main {
         min-height: calc(100vh - 60px);
         padding: 15px;
-    }
-
-    .admin-table {
-        font-size: 13px;
-    }
-
-    .admin-table th,
-    .admin-table td {
-        padding: 8px 6px;
-        font-size: 12px;
-    }
-
-    .admin-btn {
-        padding: 6px 12px;
-        font-size: 13px;
     }
 
     .admin-header .header__logo {

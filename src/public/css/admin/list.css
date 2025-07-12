@@ -175,7 +175,6 @@ td {
     margin-top: 40px;
 }
 
-/* PC (1400-1540px) */
 @media screen and (max-width: 1540px) and (min-width: 1400px) {
     .admin-attendances-container {
         padding: 18px 120px;
@@ -219,7 +218,6 @@ td {
     }
 }
 
-/* タブレット (768-850px) */
 @media screen and (max-width: 850px) and (min-width: 768px) {
     .admin-attendances-container {
         padding: 15px 20px;

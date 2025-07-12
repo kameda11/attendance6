@@ -17,19 +17,14 @@ class CreateAttendanceRequestsTable extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('attendance_id')->nullable()->constrained()->onDelete('cascade');
-            $table->date('target_date'); //勤怠申請日
+            $table->date('target_date');
             $table->enum('request_type', ['create', 'update']);
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-
             $table->time('clock_in_time')->nullable();
             $table->time('clock_out_time')->nullable();
-            $table->json('break_info')->nullable(); // 休憩情報をJSON形式で保存
-            $table->text('notes');
-
+            $table->json('break_info')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
-
-            // 開発・テスト用のため、ユニーク制約は一時的に削除
-            // 本番環境では必要に応じて適切な制約を追加することを推奨
         });
     }
 

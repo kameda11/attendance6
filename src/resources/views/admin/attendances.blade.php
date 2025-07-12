@@ -117,7 +117,6 @@
         window.location.href = currentUrl.toString();
     });
 
-    // カレンダーアイコンをクリックしたときにdate pickerを開く
     document.querySelector('.calendar-button').addEventListener('click', function(e) {
         e.preventDefault();
         document.getElementById('dateSelector').showPicker();

@@ -22,9 +22,6 @@ class Breaktime extends Model
         'end_time' => 'datetime',
     ];
 
-    /**
-     * 勤怠記録とのリレーション
-     */
     public function attendance()
     {
         return $this->belongsTo(Attendance::class);
@@ -35,9 +32,6 @@ class Breaktime extends Model
         return $this->hasMany(BreakRequest::class);
     }
 
-    /**
-     * 休憩時間を分で取得
-     */
     public function getDurationInMinutes()
     {
         if (!$this->end_time) {
@@ -47,17 +41,11 @@ class Breaktime extends Model
         return $this->start_time->diffInMinutes($this->end_time);
     }
 
-    /**
-     * 休憩が終了しているかチェック
-     */
     public function isCompleted()
     {
         return !is_null($this->end_time);
     }
 
-    /**
-     * 現在進行中の休憩かチェック
-     */
     public function isActive()
     {
         return is_null($this->end_time);

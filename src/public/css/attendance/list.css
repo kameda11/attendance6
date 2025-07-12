@@ -21,7 +21,7 @@
     padding-left: 10px;
 }
 
-.month-navigation {
+.date-navigation {
     margin-bottom: 30px;
 }
 
@@ -33,16 +33,6 @@
     background-color: #ffffff;
     border-radius: 10px;
     font-weight: bold;
-}
-
-.nav-button {
-    color: #737373;
-    text-decoration: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
 }
 
 .current-date {
@@ -181,20 +171,6 @@ td a {
     min-width: 60px;
 }
 
-.pending-request {
-    background-color: #fff3cd;
-}
-
-.pending-badge {
-    background-color: #ffc107;
-    color: #000;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.8em;
-    margin-left: 5px;
-}
-
-/* PC (1400-1540px) */
 @media screen and (max-width: 1540px) and (min-width: 1400px) {
     .attendance-list-container {
         padding: 40px 150px;
@@ -202,11 +178,6 @@ td a {
 
     .attendance-list-header h1 {
         font-size: 1.4em;
-    }
-
-    .nav-button {
-        padding: 8px 16px;
-        font-size: 14px;
     }
 
     .current-date h2 {
@@ -236,13 +207,8 @@ td a {
         font-size: 0.75em;
         min-width: 55px;
     }
-
-    .pending-badge {
-        font-size: 0.75em;
-    }
 }
 
-/* タブレット (768-850px) */
 @media screen and (max-width: 850px) and (min-width: 768px) {
     .attendance-list-container {
         padding: 30px;
@@ -264,11 +230,6 @@ td a {
     .nav-content {
         gap: 10px;
         padding: 15px;
-    }
-
-    .nav-button {
-        padding: 6px 12px;
-        font-size: 13px;
     }
 
     .current-date {
@@ -323,11 +284,5 @@ td a {
         font-size: 0.7em;
         min-width: 50px;
         padding: 3px 6px;
-    }
-
-    .pending-badge {
-        font-size: 0.7em;
-        padding: 1px 4px;
-        margin-left: 3px;
     }
 }

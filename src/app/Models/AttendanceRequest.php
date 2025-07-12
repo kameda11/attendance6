@@ -28,21 +28,16 @@ class AttendanceRequest extends Model
         'break_info' => 'array',
     ];
 
-    /**
-     * break_infoの保存時に時間形式を統一
-     */
     public function setBreakInfoAttribute($value)
     {
         if (is_array($value)) {
             foreach ($value as &$break) {
                 if (isset($break['start_time']) && $break['start_time']) {
-                    // 時間のみの形式（HH:MM）の場合はそのまま保持
                     if (!preg_match('/^\d{4}-\d{2}-\d{2}/', $break['start_time'])) {
                         $break['start_time'] = $break['start_time'];
                     }
                 }
                 if (isset($break['end_time']) && $break['end_time']) {
-                    // 時間のみの形式（HH:MM）の場合はそのまま保持
                     if (!preg_match('/^\d{4}-\d{2}-\d{2}/', $break['end_time'])) {
                         $break['end_time'] = $break['end_time'];
                     }
@@ -63,15 +58,12 @@ class AttendanceRequest extends Model
         return $this->belongsTo(Attendance::class);
     }
 
-    // 申請ステータスの定数
     const STATUS_PENDING = 'pending';
     const STATUS_APPROVED = 'approved';
 
-    // 申請タイプの定数
     const TYPE_CREATE = 'create';
     const TYPE_UPDATE = 'update';
 
-    // ステータスラベル
     public function getStatusLabelAttribute()
     {
         return [
@@ -80,7 +72,6 @@ class AttendanceRequest extends Model
         ][$this->status] ?? $this->status;
     }
 
-    // 申請タイプラベル
     public function getRequestTypeLabelAttribute()
     {
         return [

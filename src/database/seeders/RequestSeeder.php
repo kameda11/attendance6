@@ -25,17 +25,14 @@ class RequestSeeder extends Seeder
             return;
         }
 
-        // 過去7日分の申請データを作成
         for ($i = 7; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
 
-            // 土日はスキップ（営業日のみ）
             if ($date->isWeekend()) {
                 continue;
             }
 
             foreach ($users as $user) {
-                // 20%の確率で申請を作成
                 if (rand(1, 100) <= 20) {
                     $this->createRequestData($user, $date);
                 }
@@ -43,39 +40,27 @@ class RequestSeeder extends Seeder
         }
     }
 
-    /**
-     * 申請データを作成
-     */
     private function createRequestData($user, $date)
     {
-        // 既存の勤怠記録を取得
         $existingAttendance = Attendance::where('user_id', $user->id)
             ->whereDate('created_at', $date)
             ->first();
 
-        // 勤怠申請を作成（70%の確率で承認済み、30%の確率で申請中）
         $status = rand(1, 100) <= 70 ? 'approved' : 'pending';
 
         if ($existingAttendance) {
-            // 修正申請
             $this->createUpdateRequest($user, $existingAttendance, $date, $status);
         } else {
-            // 新規作成申請
             $this->createCreateRequest($user, $date, $status);
         }
 
-        // 休憩申請を作成（既存の勤怠がある場合のみ）
         if ($existingAttendance && rand(1, 100) <= 30) {
             $this->createBreakRequest($user, $existingAttendance, $date, $status);
         }
     }
 
-    /**
-     * 修正申請を作成
-     */
     private function createUpdateRequest($user, $attendance, $date, $status)
     {
-        // 元の時間を少し変更
         $originalClockIn = Carbon::parse($attendance->clock_in_time);
         $originalClockOut = Carbon::parse($attendance->clock_out_time);
 
@@ -94,22 +79,16 @@ class RequestSeeder extends Seeder
         ]);
     }
 
-    /**
-     * 新規作成申請を作成
-     */
     private function createCreateRequest($user, $date, $status)
     {
-        // 出勤時間（8:00-10:00の間でランダム）
         $clockInHour = rand(8, 10);
         $clockInMinute = rand(0, 59);
         $clockInTime = $date->copy()->setTime($clockInHour, $clockInMinute);
 
-        // 退勤時間（17:00-20:00の間でランダム）
         $clockOutHour = rand(17, 20);
         $clockOutMinute = rand(0, 59);
         $clockOutTime = $date->copy()->setTime($clockOutHour, $clockOutMinute);
 
-        // 休憩情報を作成
         $breakInfo = [];
         $breakCount = rand(1, 2);
 
@@ -141,18 +120,13 @@ class RequestSeeder extends Seeder
         ]);
     }
 
-    /**
-     * 休憩申請を作成
-     */
     private function createBreakRequest($user, $attendance, $date, $status)
     {
-        // 既存の休憩を取得
         $existingBreaks = $attendance->breaks;
 
         if ($existingBreaks->isNotEmpty()) {
             $break = $existingBreaks->first();
 
-            // 修正申請
             BreakRequest::create([
                 'user_id' => $user->id,
                 'break_id' => $break->id,
@@ -164,7 +138,6 @@ class RequestSeeder extends Seeder
                 'end_time' => Carbon::parse($break->end_time)->addMinutes(rand(-15, 15)),
             ]);
         } else {
-            // 新規作成申請
             $breakStartHour = rand(11, 14);
             $breakStartMinute = rand(0, 59);
             $breakStartTime = sprintf('%02d:%02d', $breakStartHour, $breakStartMinute);
@@ -186,9 +159,6 @@ class RequestSeeder extends Seeder
         }
     }
 
-    /**
-     * ランダムな申請備考を取得
-     */
     private function getRandomRequestNotes()
     {
         $notes = [

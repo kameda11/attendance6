@@ -1,7 +1,6 @@
 .attendance-container {
     margin-left: auto;
     margin-right: auto;
-    font-family: 'Inter', sans-serif;
     background-color: #F0EFF2;
     min-height: 100vh;
     padding: 100px 150px;
@@ -25,12 +24,6 @@
     color: #696969;
 }
 
-.status-label {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #555;
-}
-
 .status-value {
     font-weight: bold;
     border-radius: 20px;
@@ -45,11 +38,6 @@
 .status-value.break {
     background: #FFFFFF;
     color: #000000;
-}
-
-.status-value.not-working {
-    background: #000000;
-    color: #FFFFFF;
 }
 
 .status-badge {
@@ -95,12 +83,6 @@
     font-size: 1em;
     color: #666;
     font-weight: 500;
-}
-
-.attendance-times p {
-    margin: 5px 0;
-    color: #000000;
-    font-weight: bold;
 }
 
 .attendance-buttons {
@@ -159,7 +141,6 @@
     color: #000000;
 }
 
-/* PC (1400-1540px) */
 @media screen and (max-width: 1540px) and (min-width: 1400px) {
     .attendance-container {
         padding: 80px 120px;
@@ -180,7 +161,6 @@
     }
 }
 
-/* タブレット (768-850px) */
 @media screen and (max-width: 850px) and (min-width: 768px) {
     .attendance-container {
         padding: 60px 40px;
