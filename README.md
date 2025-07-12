@@ -50,12 +50,12 @@ php artisan storage:link
 ## ログイン情報
 
 ### 管理者ユーザー
-- ログインURL: http://localhost/admin/login/
+- URL: http://localhost/admin/login/
 - ユーザー名: admin@example.com
 - パスワード: admin1234
 
 ### 一般ユーザー
-- ログインURL: http://localhost/
+- URL: http://localhost/
 - ユーザー名: tanaka@example.com
 - パスワード: password123
 
