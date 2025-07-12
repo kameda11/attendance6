@@ -52,7 +52,7 @@ php artisan storage:link
 ### 管理者ユーザー
 - URL: http://localhost/admin/login/
 - ユーザー名: admin@example.com
-- パスワード: admin1234
+- パスワード: admin123
 
 ### 一般ユーザー
 - URL: http://localhost/
