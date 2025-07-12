@@ -47,6 +47,21 @@ php artisan db:seed
 php artisan storage:link
 ```
 
+## ログイン情報
+
+### 管理者ユーザー
+- ログインURL: http://localhost/admin/login/
+- ユーザー名: admin@example.com
+- パスワード: admin1234
+
+### 一般ユーザー
+- ログインURL: http://localhost/
+- ユーザー名: tanaka@example.com
+- パスワード: password123
+
+### phpMyAdmin
+- URL: http://localhost:8080/
+
 ## 使用技術(実行環境)
 ・PHP 7.4.9  </br>
 ・Laravel 8.83.29 </br>
@@ -54,7 +69,3 @@ php artisan storage:link
 
 ## ER図
 ![alt](./attendance.drawio.png)
-
-## URL
-- 開発環境：http://localhost/
-- phpMyAdmin:：http://localhost:8080/
