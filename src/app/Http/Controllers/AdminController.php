@@ -520,7 +520,7 @@ class AdminController extends Controller
      */
     public function showApprovalPage($id)
     {
-        $request = AttendanceRequestModel::with(['user', 'attendance.breakTimes'])
+        $request = AttendanceRequestModel::with(['user', 'attendance.breaks'])
             ->findOrFail($id);
 
         return view('admin.approval', compact('request'));

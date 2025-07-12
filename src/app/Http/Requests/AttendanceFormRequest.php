@@ -29,7 +29,7 @@ class AttendanceFormRequest extends FormRequest
             'break2_start_time' => 'nullable|regex:/^[0-9]{1,2}:[0-9]{2}$/',
             'break2_end_time' => 'nullable|regex:/^[0-9]{1,2}:[0-9]{2}$/',
             'notes' => 'required|string|max:255',
-            'date' => 'required|date',
+            'date' => 'nullable|date',
         ];
 
         // 管理者の新規作成時のみuser_idを必須にする（一般ユーザーは不要）

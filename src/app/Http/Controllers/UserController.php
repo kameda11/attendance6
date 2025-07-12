@@ -676,9 +676,12 @@ class UserController extends Controller
         /** @var User $user */
         $user = Auth::user();
         try {
+            // バリデーションを先に実行（AttendanceFormRequestで自動的に実行される）
+            $validated = $request->validated();
+
             $attendance = $user->attendances()->findOrFail($id);
 
-            // 既に保留中の申請があるかチェック
+            // 既に保留中の申請があるかチェック（バリデーション後）
             $existingRequest = $user->attendanceRequests()
                 ->where('attendance_id', $id)
                 ->where('status', 'pending')
