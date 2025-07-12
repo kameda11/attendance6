@@ -95,6 +95,6 @@ class LoginController extends Controller
     public function resendVerificationEmail(Request $request)
     {
         $request->user()->sendEmailVerificationNotification();
-        return back()->with('status', '認証メールを再送信しました。');
+        return back()->with('status', '認証メールを再送信しました');
     }
 }
