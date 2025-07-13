@@ -26,15 +26,15 @@ class AdminAttendanceUpdateTest extends TestCase
         ]);
 
         $attendance1 = $user1->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
+            'clock_in_time' => Carbon::parse('2025-07-13 09:00:00'),
+            'clock_out_time' => Carbon::parse('2025-07-13 18:00:00'),
             'status' => 'completed',
             'notes' => '元の備考1',
         ]);
 
         $attendance2 = $user2->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-01-16 08:30:00'),
-            'clock_out_time' => Carbon::parse('2025-01-16 17:30:00'),
+            'clock_in_time' => Carbon::parse('2025-07-14 08:30:00'),
+            'clock_out_time' => Carbon::parse('2025-07-14 17:30:00'),
             'status' => 'completed',
             'notes' => '元の備考2',
         ]);
@@ -42,33 +42,33 @@ class AdminAttendanceUpdateTest extends TestCase
         $request1 = AttendanceRequest::create([
             'user_id' => $user1->id,
             'attendance_id' => $attendance1->id,
-            'target_date' => '2025-01-15',
+            'target_date' => '2025-07-13',
             'request_type' => 'update',
             'status' => 'pending',
-            'clock_in_time' => '2025-01-15 08:30:00',
-            'clock_out_time' => '2025-01-15 17:30:00',
+            'clock_in_time' => '2025-07-13 08:30:00',
+            'clock_out_time' => '2025-07-13 17:30:00',
             'notes' => '修正申請の備考1',
         ]);
 
         $request2 = AttendanceRequest::create([
             'user_id' => $user2->id,
             'attendance_id' => $attendance2->id,
-            'target_date' => '2025-01-16',
+            'target_date' => '2025-07-14',
             'request_type' => 'update',
             'status' => 'pending',
-            'clock_in_time' => '2025-01-16 08:00:00',
-            'clock_out_time' => '2025-01-16 17:00:00',
+            'clock_in_time' => '2025-07-14 08:00:00',
+            'clock_out_time' => '2025-07-14 17:00:00',
             'notes' => '修正申請の備考2',
         ]);
 
         $request3 = AttendanceRequest::create([
             'user_id' => $user1->id,
             'attendance_id' => $attendance1->id,
-            'target_date' => '2025-01-15',
+            'target_date' => '2025-07-13',
             'request_type' => 'update',
             'status' => 'approved',
-            'clock_in_time' => '2025-01-15 09:30:00',
-            'clock_out_time' => '2025-01-15 18:30:00',
+            'clock_in_time' => '2025-07-13 09:30:00',
+            'clock_out_time' => '2025-07-13 18:30:00',
             'notes' => '承認済みの備考',
         ]);
 
@@ -98,15 +98,15 @@ class AdminAttendanceUpdateTest extends TestCase
         ]);
 
         $attendance1 = $user1->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
+            'clock_in_time' => Carbon::parse('2025-07-13 09:00:00'),
+            'clock_out_time' => Carbon::parse('2025-07-13 18:00:00'),
             'status' => 'completed',
             'notes' => '元の備考1',
         ]);
 
         $attendance2 = $user2->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-01-16 08:30:00'),
-            'clock_out_time' => Carbon::parse('2025-01-16 17:30:00'),
+            'clock_in_time' => Carbon::parse('2025-07-14 08:30:00'),
+            'clock_out_time' => Carbon::parse('2025-07-14 17:30:00'),
             'status' => 'completed',
             'notes' => '元の備考2',
         ]);
@@ -114,44 +114,44 @@ class AdminAttendanceUpdateTest extends TestCase
         $request1 = AttendanceRequest::create([
             'user_id' => $user1->id,
             'attendance_id' => $attendance1->id,
-            'target_date' => '2025-01-15',
+            'target_date' => '2025-07-13',
             'request_type' => 'update',
             'status' => 'pending',
-            'clock_in_time' => '2025-01-15 08:30:00',
-            'clock_out_time' => '2025-01-15 17:30:00',
+            'clock_in_time' => '2025-07-13 08:30:00',
+            'clock_out_time' => '2025-07-13 17:30:00',
             'notes' => '修正申請の備考1',
         ]);
 
         $request2 = AttendanceRequest::create([
             'user_id' => $user2->id,
             'attendance_id' => $attendance2->id,
-            'target_date' => '2025-01-16',
+            'target_date' => '2025-07-14',
             'request_type' => 'update',
             'status' => 'pending',
-            'clock_in_time' => '2025-01-16 08:00:00',
-            'clock_out_time' => '2025-01-16 17:00:00',
+            'clock_in_time' => '2025-07-14 08:00:00',
+            'clock_out_time' => '2025-07-14 17:00:00',
             'notes' => '修正申請の備考2',
         ]);
 
         $request3 = AttendanceRequest::create([
             'user_id' => $user1->id,
             'attendance_id' => $attendance1->id,
-            'target_date' => '2025-01-15',
+            'target_date' => '2025-07-13',
             'request_type' => 'update',
             'status' => 'approved',
-            'clock_in_time' => '2025-01-15 09:30:00',
-            'clock_out_time' => '2025-01-15 18:30:00',
+            'clock_in_time' => '2025-07-13 09:30:00',
+            'clock_out_time' => '2025-07-13 18:30:00',
             'notes' => '修正申請の備考3',
         ]);
 
         $request4 = AttendanceRequest::create([
             'user_id' => $user2->id,
             'attendance_id' => $attendance2->id,
-            'target_date' => '2025-01-16',
+            'target_date' => '2025-07-14',
             'request_type' => 'update',
             'status' => 'approved',
-            'clock_in_time' => '2025-01-16 08:00:00',
-            'clock_out_time' => '2025-01-16 17:00:00',
+            'clock_in_time' => '2025-07-14 08:00:00',
+            'clock_out_time' => '2025-07-14 17:00:00',
             'notes' => '修正申請の備考2',
         ]);
 
@@ -175,8 +175,8 @@ class AdminAttendanceUpdateTest extends TestCase
         ]);
 
         $attendance = $user->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
+            'clock_in_time' => Carbon::parse('2025-07-13 09:00:00'),
+            'clock_out_time' => Carbon::parse('2025-07-13 18:00:00'),
             'status' => 'completed',
             'notes' => '元の備考',
         ]);
@@ -184,11 +184,11 @@ class AdminAttendanceUpdateTest extends TestCase
         $request = AttendanceRequest::create([
             'user_id' => $user->id,
             'attendance_id' => $attendance->id,
-            'target_date' => '2025-01-15',
+            'target_date' => '2025-07-13',
             'request_type' => 'update',
             'status' => 'pending',
-            'clock_in_time' => '2025-01-15 08:30:00',
-            'clock_out_time' => '2025-01-15 17:30:00',
+            'clock_in_time' => '2025-07-13 08:30:00',
+            'clock_out_time' => '2025-07-13 17:30:00',
             'notes' => '修正申請の備考',
         ]);
 
@@ -201,7 +201,7 @@ class AdminAttendanceUpdateTest extends TestCase
         $response->assertSee('修正申請の備考');
         $response->assertSee('2025');
         $response->assertSee('7');
-        $response->assertSee('12');
+        $response->assertSee('13');
     }
 
 
@@ -214,8 +214,8 @@ class AdminAttendanceUpdateTest extends TestCase
         ]);
 
         $attendance = $user->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
+            'clock_in_time' => Carbon::parse('2025-07-13 09:00:00'),
+            'clock_out_time' => Carbon::parse('2025-07-13 18:00:00'),
             'status' => 'completed',
             'notes' => '元の備考',
         ]);
@@ -223,11 +223,11 @@ class AdminAttendanceUpdateTest extends TestCase
         $request = AttendanceRequest::create([
             'user_id' => $user->id,
             'attendance_id' => $attendance->id,
-            'target_date' => '2025-01-15',
+            'target_date' => '2025-07-13',
             'request_type' => 'update',
             'status' => 'pending',
-            'clock_in_time' => '2025-01-15 08:30:00',
-            'clock_out_time' => '2025-01-15 17:30:00',
+            'clock_in_time' => '2025-07-13 08:30:00',
+            'clock_out_time' => '2025-07-13 17:30:00',
             'notes' => '修正申請の備考',
         ]);
 

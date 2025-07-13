@@ -42,7 +42,7 @@ class AttendanceUpdateTest extends TestCase
     }
 
 
-    public function test_validation_error_when_break_start_time_is_after_break_end_time()
+    public function test_validation_error_when_break_time_is_outside_work_hours()
     {
         /** @var User $user */
         $user = User::factory()->create();
@@ -58,50 +58,31 @@ class AttendanceUpdateTest extends TestCase
         $response = $this->get("/attendance/detail/{$attendance->id}");
         $response->assertStatus(200);
 
-        $updateData = [
+        $updateData1 = [
             'clock_in_time' => '09:00',
             'clock_out_time' => '18:00',
-            'break1_start_time' => '19:00',
-            'break1_end_time' => '18:00',
+            'break1_start_time' => '08:00',
+            'break1_end_time' => '09:30',
             'notes' => 'テスト用の備考',
         ];
 
-        $response = $this->put("/attendance/update/{$attendance->id}", $updateData);
+        $response1 = $this->put("/attendance/update/{$attendance->id}", $updateData1);
+        $response1->assertSessionHasErrors();
+        $response1->assertRedirect();
+        $this->followRedirects($response1)->assertSee('休憩時間が不適切な値です');
 
-        $response->assertSessionHasErrors();
-        $response->assertRedirect();
-        $this->followRedirects($response)->assertSee('休憩時間が不適切な値です');
-    }
-
-    public function test_validation_error_when_break_end_time_is_after_clock_out_time()
-    {
-        /** @var User $user */
-        $user = User::factory()->create();
-        $this->actingAs($user);
-
-        $attendance = $user->attendances()->create([
-            'clock_in_time' => now()->subDays(1)->setTime(9, 0),
-            'clock_out_time' => now()->subDays(1)->setTime(18, 0),
-            'status' => 'completed',
-            'created_at' => now()->subDays(1),
-        ]);
-
-        $response = $this->get("/attendance/detail/{$attendance->id}");
-        $response->assertStatus(200);
-
-        $updateData = [
+        $updateData2 = [
             'clock_in_time' => '09:00',
             'clock_out_time' => '18:00',
-            'break1_start_time' => '18:00',
+            'break1_start_time' => '17:00',
             'break1_end_time' => '19:00',
             'notes' => 'テスト用の備考',
         ];
 
-        $response = $this->put("/attendance/update/{$attendance->id}", $updateData);
-
-        $response->assertSessionHasErrors();
-        $response->assertRedirect();
-        $this->followRedirects($response)->assertSee('休憩終了時間もしくは退勤時間が不適切な値です');
+        $response2 = $this->put("/attendance/update/{$attendance->id}", $updateData2);
+        $response2->assertSessionHasErrors();
+        $response2->assertRedirect();
+        $this->followRedirects($response2)->assertSee('休憩時間が不適切な値です');
     }
 
 

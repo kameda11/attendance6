@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Attendance;
 use App\Models\BreakRequest;
@@ -617,12 +618,20 @@ class UserController extends Controller
                 $requestData['clock_out_time'] = $clockOutTime;
             }
 
+            // デバッグ用ログ
+            Log::info('Attendance update request data:', $requestData);
+
             $attendanceRequest = AttendanceRequestModel::create($requestData);
+
+            // デバッグ用ログ
+            Log::info('Attendance request created:', ['id' => $attendanceRequest->id]);
 
             $this->processBreakRequests($user, $attendance, $request);
 
             return redirect()->route('user.attendance.list');
         } catch (\Exception $e) {
+            // エラーログ
+            Log::error('Attendance update error:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors(['general' => 'エラーが発生しました: ' . $e->getMessage()]);
         }
     }
@@ -647,7 +656,6 @@ class UserController extends Controller
 
         $requestData = [
             'user_id' => $user->id,
-            'attendance_id' => $attendance->id,
             'target_date' => $attendance->created_at->format('Y-m-d'),
             'status' => 'pending',
         ];
@@ -677,12 +685,17 @@ class UserController extends Controller
             }
         }
 
+        // 既存のBreakRequestをチェックして、必要に応じて更新または作成
         $existingRequest = $user->breakRequests()
-            ->where('attendance_id', $attendance->id)
+            ->where('break_id', $existingBreak ? $existingBreak->id : null)
             ->where('status', 'pending')
             ->first();
 
-        if (!$existingRequest) {
+        if ($existingRequest) {
+            // 既存のリクエストを更新
+            $existingRequest->update($requestData);
+        } else {
+            // 新しいリクエストを作成
             BreakRequest::create($requestData);
         }
     }

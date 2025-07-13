@@ -364,7 +364,14 @@ class AdminController extends Controller
         $request = AttendanceRequestModel::with(['user', 'attendance.breaks'])
             ->findOrFail($id);
 
-        return view('admin.approval', compact('request'));
+        // 同じ日付の休憩リクエストも取得
+        $breakRequests = BreakRequest::where('user_id', $request->user_id)
+            ->where('target_date', $request->target_date)
+            ->where('status', 'pending')
+            ->with(['break'])
+            ->get();
+
+        return view('admin.approval', compact('request', 'breakRequests'));
     }
 
     public function approveRequest(Request $request, $id)
@@ -379,6 +386,16 @@ class AdminController extends Controller
             'status' => 'approved',
         ]);
 
+        // 同じ日付の休憩リクエストも承認
+        $breakRequests = BreakRequest::where('user_id', $attendanceRequest->user_id)
+            ->where('target_date', $attendanceRequest->target_date)
+            ->where('status', 'pending')
+            ->get();
+
+        foreach ($breakRequests as $breakRequest) {
+            $breakRequest->update(['status' => 'approved']);
+        }
+
         if ($attendanceRequest->request_type === 'update') {
             $attendance = $attendanceRequest->attendance;
             $updateData = [];
@@ -391,6 +408,9 @@ class AdminController extends Controller
             }
 
             $attendance->update($updateData);
+
+            // 休憩時間も更新
+            $this->updateBreakTimesFromRequests($attendance, $breakRequests);
         } else {
             $createData = [
                 'user_id' => $attendanceRequest->user_id,
@@ -690,7 +710,7 @@ class AdminController extends Controller
                 $attendanceRequest ? ($attendanceRequest->clock_out_time ? Carbon::parse($attendanceRequest->clock_out_time)->format('H:i') : '') : ($attendance && $attendance->clock_out_time ? $attendance->clock_out_time->format('H:i') : ''),
                 $breakTime,
                 $workTime,
-                $attendanceRequest ? ($attendanceRequest->notes ?? '') : ($attendance ? ($attendance->notes ?? '') : '') 
+                $attendanceRequest ? ($attendanceRequest->notes ?? '') : ($attendance ? ($attendance->notes ?? '') : '')
             ];
         }
 
@@ -857,37 +877,9 @@ class AdminController extends Controller
 
     private function processBreakRequestsAfterApproval($attendance, $attendanceRequest)
     {
-        if ($attendanceRequest->break_info) {
-            foreach ($attendanceRequest->break_info as $breakInfo) {
-                $breakData = [
-                    'attendance_id' => $attendance->id,
-                ];
-
-                if (isset($breakInfo['start_time'])) {
-                    $startTimeStr = $breakInfo['start_time'];
-                    if (preg_match('/^\d{1,2}:\d{2}$/', $startTimeStr)) {
-                        $breakData['start_time'] = $attendanceRequest->target_date . ' ' . $startTimeStr . ':00';
-                    } else {
-                        $breakData['start_time'] = $startTimeStr;
-                    }
-                }
-                if (isset($breakInfo['end_time'])) {
-                    $endTimeStr = $breakInfo['end_time'];
-                    if (preg_match('/^\d{1,2}:\d{2}$/', $endTimeStr)) {
-                        $breakData['end_time'] = $attendanceRequest->target_date . ' ' . $endTimeStr . ':00';
-                    } else {
-                        $breakData['end_time'] = $endTimeStr;
-                    }
-                }
-
-                Breaktime::create($breakData);
-            }
-        }
-
-        $breakRequests = BreakRequest::where('user_id', $attendance->user_id)
+        $breakRequests = BreakRequest::where('user_id', $attendanceRequest->user_id)
             ->where('target_date', $attendanceRequest->target_date)
-            ->where('status', 'pending')
-            ->where('request_type', 'update')
+            ->where('status', 'approved')
             ->get();
 
         foreach ($breakRequests as $breakRequest) {
@@ -904,6 +896,24 @@ class AdminController extends Controller
                 }
                 if ($breakRequest->end_time) {
                     $updateData['end_time'] = $breakRequest->target_date . ' ' . $breakRequest->end_time;
+                }
+
+                $breakRequest->break->update($updateData);
+            }
+        }
+    }
+
+    private function updateBreakTimesFromRequests($attendance, $breakRequests)
+    {
+        foreach ($breakRequests as $breakRequest) {
+            if ($breakRequest->break) {
+                $updateData = [];
+
+                if ($breakRequest->start_time) {
+                    $updateData['start_time'] = $breakRequest->target_date . ' ' . $breakRequest->start_time->format('H:i:s');
+                }
+                if ($breakRequest->end_time) {
+                    $updateData['end_time'] = $breakRequest->target_date . ' ' . $breakRequest->end_time->format('H:i:s');
                 }
 
                 $breakRequest->break->update($updateData);

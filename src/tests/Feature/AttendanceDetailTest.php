@@ -48,7 +48,7 @@ class AttendanceDetailTest extends TestCase
         $response->assertStatus(200);
 
         $response->assertSee('2025年');
-        $response->assertSee('7月12日');
+        $response->assertSee('7月13日');
     }
 
     public function test_clock_in_out_times_are_displayed_correctly()

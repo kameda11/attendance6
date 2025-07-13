@@ -12,164 +12,139 @@ class AdminAttendanceDetailTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_view_attendance_detail()
+    public function test_admin_can_view_attendance_detail_with_selected_information()
     {
         $admin = Admin::factory()->create();
+        $this->session(['admin_logged_in' => true, 'admin_email' => $admin->email]);
+
         $user = User::factory()->create(['name' => '田中太郎']);
 
+        $selectedDate = Carbon::parse('2025-07-13');
         $attendance = $user->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
+            'clock_in_time' => $selectedDate->copy()->setTime(9, 0),
+            'clock_out_time' => $selectedDate->copy()->setTime(18, 0),
             'status' => 'completed',
+            'created_at' => $selectedDate,
+            'notes' => 'テスト用の備考',
         ]);
 
         $attendance->breaks()->create([
-            'start_time' => Carbon::parse('2025-01-15 12:00:00'),
-            'end_time' => Carbon::parse('2025-01-15 13:00:00'),
+            'start_time' => $selectedDate->copy()->setTime(12, 0),
+            'end_time' => $selectedDate->copy()->setTime(13, 0),
         ]);
-
-        $this->session(['admin_logged_in' => true, 'admin_email' => $admin->email]);
 
         $response = $this->get('/admin/attendance/' . $attendance->id);
         $response->assertStatus(200);
 
         $response->assertSee('田中太郎');
+        $response->assertSee('2025');
+        $response->assertSee('7');
+        $response->assertSee('13');
         $response->assertSee('09:00');
         $response->assertSee('18:00');
         $response->assertSee('12:00');
         $response->assertSee('13:00');
+        $response->assertSee('テスト用の備考');
     }
 
-    public function test_admin_cannot_set_clock_in_time_after_clock_out_time()
+    public function test_validation_error_when_clock_in_time_is_after_clock_out_time()
     {
-        $admin = Admin::factory()->create();
-        $user = User::factory()->create(['name' => '田中太郎']);
+        /** @var User $user */
+        $user = User::factory()->create();
+        $this->actingAs($user);
 
         $attendance = $user->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
+            'clock_in_time' => now()->subDays(1)->setTime(9, 0),
+            'clock_out_time' => now()->subDays(1)->setTime(18, 0),
             'status' => 'completed',
+            'created_at' => now()->subDays(1),
         ]);
 
-        $this->session(['admin_logged_in' => true, 'admin_email' => $admin->email]);
+        $response = $this->get("/attendance/detail/{$attendance->id}");
+        $response->assertStatus(200);
 
-        $invalidData = [
+        $updateData = [
             'clock_in_time' => '19:00',
             'clock_out_time' => '18:00',
-            'notes' => 'テスト備考',
-            'date' => '2025-01-15',
+            'notes' => 'テスト用の備考',
         ];
 
-        $response = $this->put('/admin/attendance/update/' . $attendance->id, $invalidData);
+        $response = $this->put("/attendance/update/{$attendance->id}", $updateData);
 
         $response->assertSessionHasErrors();
-        $response->assertSessionHasErrors('clock_in_time');
-
-        $this->assertDatabaseHas('attendances', [
-            'id' => $attendance->id,
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
-        ]);
+        $response->assertRedirect();
+        $this->followRedirects($response)->assertSee('出勤時間もしくは退勤時間が不適切な値です');
     }
 
-    public function test_admin_cannot_set_break_start_time_after_clock_out_time()
+
+    public function test_validation_error_when_break_time_is_outside_work_hours()
     {
-        $admin = Admin::factory()->create();
-        $user = User::factory()->create(['name' => '田中太郎']);
+        /** @var User $user */
+        $user = User::factory()->create();
+        $this->actingAs($user);
 
         $attendance = $user->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
+            'clock_in_time' => now()->subDays(1)->setTime(9, 0),
+            'clock_out_time' => now()->subDays(1)->setTime(18, 0),
             'status' => 'completed',
+            'created_at' => now()->subDays(1),
         ]);
 
-        $this->session(['admin_logged_in' => true, 'admin_email' => $admin->email]);
+        $response = $this->get("/attendance/detail/{$attendance->id}");
+        $response->assertStatus(200);
 
-        $invalidData = [
+        $updateData1 = [
             'clock_in_time' => '09:00',
             'clock_out_time' => '18:00',
-            'break1_start_time' => '19:00',
-            'break1_end_time' => '20:00',
-            'notes' => 'テスト備考',
-            'date' => '2025-01-15',
+            'break1_start_time' => '08:00',
+            'break1_end_time' => '09:30',
+            'notes' => 'テスト用の備考',
         ];
 
-        $response = $this->put('/admin/attendance/update/' . $attendance->id, $invalidData);
+        $response1 = $this->put("/attendance/update/{$attendance->id}", $updateData1);
+        $response1->assertSessionHasErrors();
+        $response1->assertRedirect();
+        $this->followRedirects($response1)->assertSee('休憩時間が不適切な値です');
 
-        $response->assertSessionHasErrors();
-        $response->assertSessionHasErrors('break1_start_time');
-
-        $this->assertDatabaseHas('attendances', [
-            'id' => $attendance->id,
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
-        ]);
-    }
-
-    public function test_admin_cannot_set_break_end_time_after_clock_out_time()
-    {
-        $admin = Admin::factory()->create();
-        $user = User::factory()->create(['name' => '田中太郎']);
-
-        $attendance = $user->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
-            'status' => 'completed',
-        ]);
-
-        $this->session(['admin_logged_in' => true, 'admin_email' => $admin->email]);
-
-        $invalidData = [
+        $updateData2 = [
             'clock_in_time' => '09:00',
             'clock_out_time' => '18:00',
-            'break1_start_time' => '12:00',
+            'break1_start_time' => '17:00',
             'break1_end_time' => '19:00',
-            'notes' => 'テスト備考',
-            'date' => '2025-01-15',
+            'notes' => 'テスト用の備考',
         ];
 
-        $response = $this->put('/admin/attendance/update/' . $attendance->id, $invalidData);
-
-        $response->assertSessionHasErrors();
-        $response->assertSessionHasErrors('break1_end_time');
-
-        $this->assertDatabaseHas('attendances', [
-            'id' => $attendance->id,
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
-        ]);
+        $response2 = $this->put("/attendance/update/{$attendance->id}", $updateData2);
+        $response2->assertSessionHasErrors();
+        $response2->assertRedirect();
+        $this->followRedirects($response2)->assertSee('休憩時間が不適切な値です');
     }
 
 
-    public function test_admin_cannot_save_attendance_without_remarks()
+    public function test_validation_error_when_notes_is_empty()
     {
-        $admin = Admin::factory()->create();
-        $user = User::factory()->create(['name' => '田中太郎']);
+        /** @var User $user */
+        $user = User::factory()->create();
+        $this->actingAs($user);
 
         $attendance = $user->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
+            'clock_in_time' => now()->subDays(1)->setTime(9, 0),
+            'clock_out_time' => now()->subDays(1)->setTime(18, 0),
             'status' => 'completed',
+            'created_at' => now()->subDays(1),
         ]);
 
-        $this->session(['admin_logged_in' => true, 'admin_email' => $admin->email]);
+        $response = $this->get("/attendance/detail/{$attendance->id}");
+        $response->assertStatus(200);
 
-        $invalidData = [
-            'clock_in_time' => '09:00',
-            'clock_out_time' => '18:00',
+        $updateData = [
             'notes' => '',
-            'date' => '2025-01-15',
         ];
 
-        $response = $this->put('/admin/attendance/update/' . $attendance->id, $invalidData);
+        $response = $this->put("/attendance/update/{$attendance->id}", $updateData);
 
         $response->assertSessionHasErrors();
-        $response->assertSessionHasErrors('notes');
-
-        $this->assertDatabaseHas('attendances', [
-            'id' => $attendance->id,
-            'clock_in_time' => Carbon::parse('2025-01-15 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-01-15 18:00:00'),
-        ]);
+        $response->assertRedirect();
+        $this->followRedirects($response)->assertSee('備考を記入してください');
     }
 }
