@@ -253,12 +253,17 @@ class AdminController extends Controller
                 ->where('status', 'pending')
                 ->get();
 
+            $displayData = $this->prepareDisplayData(null, $attendanceRequest, $breakRequests);
+
             return view('admin.detail', [
                 'attendance' => null,
                 'user' => $user,
                 'selectedDate' => $selectedDate,
                 'attendanceRequest' => $attendanceRequest,
-                'breakRequests' => $breakRequests
+                'breakRequests' => $breakRequests,
+                'displayData' => $displayData,
+                'hasPendingRequest' => $attendanceRequest !== null,
+                'hasApprovedRequest' => false
             ]);
         }
 
@@ -280,12 +285,17 @@ class AdminController extends Controller
             ->where('status', 'pending')
             ->get();
 
+        $displayData = $this->prepareDisplayData($attendance, $attendanceRequest, $breakRequests);
+
         return view('admin.detail', [
             'attendance' => $attendance,
             'user' => $user,
             'selectedDate' => $attendance->created_at,
             'attendanceRequest' => $attendanceRequest,
-            'breakRequests' => $breakRequests
+            'breakRequests' => $breakRequests,
+            'displayData' => $displayData,
+            'hasPendingRequest' => $attendanceRequest !== null,
+            'hasApprovedRequest' => false
         ]);
     }
 
@@ -294,13 +304,6 @@ class AdminController extends Controller
         $attendance = Attendance::findOrFail($id);
 
         $validated = $request->validated();
-
-        // デバッグログ
-        Log::info('attendanceUpdate called', [
-            'attendance_id' => $id,
-            'validated_data' => $validated,
-            'all_request_data' => $request->all(),
-        ]);
 
         $date = $validated['date'];
 
@@ -845,15 +848,6 @@ class AdminController extends Controller
     {
         $date = $attendance->created_at->format('Y-m-d');
 
-        // デバッグログ
-        Log::info('updateBreakTimes called', [
-            'attendance_id' => $attendance->id,
-            'break1_start_time' => $request->break1_start_time,
-            'break1_end_time' => $request->break1_end_time,
-            'break2_start_time' => $request->break2_start_time,
-            'break2_end_time' => $request->break2_end_time,
-        ]);
-
         $attendance->breaks()->delete();
 
         if ($request->break1_start_time) {
@@ -875,7 +869,6 @@ class AdminController extends Controller
                 $breakData['end_time'] = $date . ' ' . $endTime;
             }
 
-            Log::info('Creating break1', $breakData);
             Breaktime::create($breakData);
         }
 
@@ -898,23 +891,12 @@ class AdminController extends Controller
                 $breakData['end_time'] = $date . ' ' . $endTime;
             }
 
-            Log::info('Creating break2', $breakData);
             Breaktime::create($breakData);
         }
     }
 
     private function updateBreakTimesWithDate($attendance, $request, $date)
     {
-        // デバッグログ
-        Log::info('updateBreakTimesWithDate called', [
-            'attendance_id' => $attendance->id,
-            'date' => $date,
-            'break1_start_time' => $request->break1_start_time,
-            'break1_end_time' => $request->break1_end_time,
-            'break2_start_time' => $request->break2_start_time,
-            'break2_end_time' => $request->break2_end_time,
-        ]);
-
         $attendance->breaks()->delete();
 
         if ($request->break1_start_time) {
@@ -936,7 +918,6 @@ class AdminController extends Controller
                 $breakData['end_time'] = $date . ' ' . $endTime;
             }
 
-            Log::info('Creating break1 with date', $breakData);
             Breaktime::create($breakData);
         }
 
@@ -959,7 +940,6 @@ class AdminController extends Controller
                 $breakData['end_time'] = $date . ' ' . $endTime;
             }
 
-            Log::info('Creating break2 with date', $breakData);
             Breaktime::create($breakData);
         }
     }
@@ -1088,5 +1068,97 @@ class AdminController extends Controller
                 $breakRequest->update(['break_id' => $newBreak->id]);
             }
         }
+    }
+
+    private function prepareDisplayData($attendance, $attendanceRequest, $breakRequests)
+    {
+        $displayData = [
+            'clockInTime' => '',
+            'clockOutTime' => '',
+            'break1StartTime' => '',
+            'break1EndTime' => '',
+            'break2StartTime' => '',
+            'break2EndTime' => '',
+            'notes' => ''
+        ];
+
+        // 承認済みリクエストを優先的にチェック
+        $approvedRequest = $this->checkApprovedRequest($attendance, $attendanceRequest);
+        if ($approvedRequest) {
+            $displayData['clockInTime'] = $approvedRequest->clock_in_time ? $approvedRequest->clock_in_time->format('H:i') : '';
+            $displayData['clockOutTime'] = $approvedRequest->clock_out_time ? $approvedRequest->clock_out_time->format('H:i') : '';
+            $displayData['notes'] = $approvedRequest->notes ?? '';
+
+            // 承認済みリクエストの休憩情報を取得
+            if ($approvedRequest->break_info) {
+                $breakInfo = $approvedRequest->break_info;
+                if (isset($breakInfo[0])) {
+                    $displayData['break1StartTime'] = $breakInfo[0]['start_time'] ?? '';
+                    $displayData['break1EndTime'] = $breakInfo[0]['end_time'] ?? '';
+                }
+                if (isset($breakInfo[1])) {
+                    $displayData['break2StartTime'] = $breakInfo[1]['start_time'] ?? '';
+                    $displayData['break2EndTime'] = $breakInfo[1]['end_time'] ?? '';
+                }
+            }
+            return $displayData;
+        }
+
+        // 保留中のリクエストをチェック
+        if ($attendanceRequest) {
+            $displayData['clockInTime'] = $attendanceRequest->clock_in_time ? $attendanceRequest->clock_in_time->format('H:i') : '';
+            $displayData['clockOutTime'] = $attendanceRequest->clock_out_time ? $attendanceRequest->clock_out_time->format('H:i') : '';
+            $displayData['notes'] = $attendanceRequest->notes ?? '';
+
+            // 保留中リクエストの休憩情報を取得
+            if ($attendanceRequest->break_info) {
+                $breakInfo = $attendanceRequest->break_info;
+                if (isset($breakInfo[0])) {
+                    $displayData['break1StartTime'] = $breakInfo[0]['start_time'] ?? '';
+                    $displayData['break1EndTime'] = $breakInfo[0]['end_time'] ?? '';
+                }
+                if (isset($breakInfo[1])) {
+                    $displayData['break2StartTime'] = $breakInfo[1]['start_time'] ?? '';
+                    $displayData['break2EndTime'] = $breakInfo[1]['end_time'] ?? '';
+                }
+            }
+            return $displayData;
+        }
+
+        // 既存の勤怠データを表示
+        if ($attendance) {
+            $displayData['clockInTime'] = $attendance->clock_in_time ? $attendance->clock_in_time->format('H:i') : '';
+            $displayData['clockOutTime'] = $attendance->clock_out_time ? $attendance->clock_out_time->format('H:i') : '';
+            $displayData['notes'] = $attendance->notes ?? '';
+
+            // 既存の休憩データを取得
+            if ($attendance->breaks && $attendance->breaks->count() > 0) {
+                $firstBreak = $attendance->breaks->first();
+                $displayData['break1StartTime'] = $firstBreak->start_time ? $firstBreak->start_time->format('H:i') : '';
+                $displayData['break1EndTime'] = $firstBreak->end_time ? $firstBreak->end_time->format('H:i') : '';
+
+                if ($attendance->breaks->count() > 1) {
+                    $secondBreak = $attendance->breaks->get(1);
+                    $displayData['break2StartTime'] = $secondBreak->start_time ? $secondBreak->start_time->format('H:i') : '';
+                    $displayData['break2EndTime'] = $secondBreak->end_time ? $secondBreak->end_time->format('H:i') : '';
+                }
+            }
+        }
+
+        return $displayData;
+    }
+
+    private function checkApprovedRequest($attendance, $attendanceRequest)
+    {
+        if (!$attendance) {
+            return null;
+        }
+
+        $approvedRequest = AttendanceRequestModel::where('user_id', $attendance->user_id)
+            ->where('target_date', $attendance->created_at->format('Y-m-d'))
+            ->where('status', 'approved')
+            ->first();
+
+        return $approvedRequest;
     }
 }

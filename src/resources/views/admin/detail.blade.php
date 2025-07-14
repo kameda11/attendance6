@@ -56,85 +56,108 @@
                     <tr>
                         <th>出勤・退勤</th>
                         <td>
+                            @if($hasPendingRequest)
+                            <div class="pending-time-display">
+                                <span class="pending-clock-in-time">{{ $displayData['clockInTime'] }}</span>
+                                <span class="pending-time-separator"> ～ </span>
+                                <span class="pending-clock-out-time">{{ $displayData['clockOutTime'] }}</span>
+                            </div>
+                            @else
                             <div class="time-inputs">
                                 <div class="time-input">
-                                    <input type="text" name="clock_in_time" maxlength="5" value="{{ old('clock_in_time', $attendanceRequest && $attendanceRequest->clock_in_time ? $attendanceRequest->clock_in_time->format('H:i') : ($attendance && $attendance->clock_in_time ? $attendance->clock_in_time->format('H:i') : '')) }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="clock_in_time" maxlength="5" value="{{ old('clock_in_time', $displayData['clockInTime']) }}" inputmode="numeric" autocomplete="off">
                                     @error('clock_in_time')
                                     <span class="error-message">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <label>～</label>
                                 <div class="time-input">
-                                    <input type="text" name="clock_out_time" maxlength="5" value="{{ old('clock_out_time', $attendanceRequest && $attendanceRequest->clock_out_time ? $attendanceRequest->clock_out_time->format('H:i') : ($attendance && $attendance->clock_out_time ? $attendance->clock_out_time->format('H:i') : '')) }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="clock_out_time" maxlength="5" value="{{ old('clock_out_time', $displayData['clockOutTime']) }}" inputmode="numeric" autocomplete="off">
                                     @error('clock_out_time')
                                     <span class="error-message">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </div>
+                            @endif
                         </td>
                     </tr>
                     <tr>
                         <th>休憩</th>
                         <td>
-                            @php
-                            // デバッグ情報
-                            echo "<!-- Debug: breakRequests count = " . ($breakRequests ? $breakRequests->count() : 'null') . " -->";
-                            echo "<!-- Debug: attendance breaks count = " . ($attendance && $attendance->breaks ? $attendance->breaks->count() : 'null') . " -->";
-                            @endphp
+                            @if($hasPendingRequest)
+                            @if($displayData['break1StartTime'] || $displayData['break1EndTime'])
+                            <div class="pending-break-item">
+                                <span class="pending-break-time">
+                                    <span class="pending-break-start-time">{{ $displayData['break1StartTime'] }}</span>
+                                    <span class="pending-break-separator"> ～ </span>
+                                    <span class="pending-break-end-time">{{ $displayData['break1EndTime'] }}</span>
+                                </span>
+                            </div>
+                            @endif
+                            @else
                             <div class="time-inputs">
                                 <div class="time-input">
-                                    <input type="text" name="break1_start_time" maxlength="5" value="{{ old('break1_start_time', $attendance && $attendance->breaks->count() > 0 ? $attendance->breaks->first()->start_time->format('H:i') : '') }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break1_start_time" maxlength="5" value="{{ old('break1_start_time', $displayData['break1StartTime']) }}" inputmode="numeric" autocomplete="off">
                                     @error('break1_start_time')
                                     <span class="error-message">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <label>～</label>
                                 <div class="time-input">
-                                    <input type="text" name="break1_end_time" maxlength="5" value="{{ old('break1_end_time', $attendance && $attendance->breaks->count() > 0 ? $attendance->breaks->first()->end_time->format('H:i') : '') }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break1_end_time" maxlength="5" value="{{ old('break1_end_time', $displayData['break1EndTime']) }}" inputmode="numeric" autocomplete="off">
                                     @error('break1_end_time')
                                     <span class="error-message">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </div>
+                            @endif
                         </td>
                     </tr>
                     <tr>
                         <th>休憩2</th>
                         <td>
-                            @php
-                            // デバッグ情報
-                            echo "<!-- Debug: breakRequests count = " . ($breakRequests ? $breakRequests->count() : 'null') . " -->";
-                            echo "<!-- Debug: attendance breaks count = " . ($attendance && $attendance->breaks ? $attendance->breaks->count() : 'null') . " -->";
-                            if ($attendance && $attendance->breaks) {
-                            $attendance->breaks->each(function($break, $index) {
-                            echo "<!-- Debug: Break " . ($index + 1) . " = " . $break->start_time->format('H:i') . " - " . $break->end_time->format('H:i') . " -->";
-                            });
-                            }
-                            @endphp
+                            @if($hasPendingRequest)
+                            @if($displayData['break2StartTime'] || $displayData['break2EndTime'])
+                            <div class="pending-break-item">
+                                <span class="pending-break-time">
+                                    <span class="pending-break-start-time">{{ $displayData['break2StartTime'] }}</span>
+                                    <span class="pending-break-separator"> ～ </span>
+                                    <span class="pending-break-end-time">{{ $displayData['break2EndTime'] }}</span>
+                                </span>
+                            </div>
+                            @endif
+                            @else
                             <div class="time-inputs">
                                 <div class="time-input">
-                                    <input type="text" name="break2_start_time" maxlength="5" value="{{ old('break2_start_time', $attendance && $attendance->breaks->count() > 1 ? $attendance->breaks->get(1)->start_time->format('H:i') : '') }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break2_start_time" maxlength="5" value="{{ old('break2_start_time', $displayData['break2StartTime']) }}" inputmode="numeric" autocomplete="off">
                                     @error('break2_start_time')
                                     <span class="error-message">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <label>～</label>
                                 <div class="time-input">
-                                    <input type="text" name="break2_end_time" maxlength="5" value="{{ old('break2_end_time', $attendance && $attendance->breaks->count() > 1 ? $attendance->breaks->get(1)->end_time->format('H:i') : '') }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break2_end_time" maxlength="5" value="{{ old('break2_end_time', $displayData['break2EndTime']) }}" inputmode="numeric" autocomplete="off">
                                     @error('break2_end_time')
                                     <span class="error-message">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </div>
+                            @endif
                         </td>
                     </tr>
                     <tr>
                         <th>備考</th>
                         <td>
-                            <textarea name="notes" class="notes-textbox" rows="4" cols="50">{{ old('notes', $attendanceRequest && $attendanceRequest->notes ? $attendanceRequest->notes : ($attendance ? ($attendance->notes ?? '') : '')) }}</textarea>
+                            @if($hasPendingRequest)
+                            <div class="pending-notes-display">
+                                {{ $displayData['notes'] }}
+                            </div>
+                            @else
+                            <textarea name="notes" class="notes-textbox" rows="4" cols="50">{{ old('notes', $displayData['notes']) }}</textarea>
                             @error('notes')
                             <span class="error-message">{{ $message }}</span>
                             @enderror
+                            @endif
                         </td>
                     </tr>
                 </tbody>
@@ -142,7 +165,13 @@
         </div>
 
         <div class="attendance-detail-actions">
+            @if($hasPendingRequest)
+            <div class="attendance-notice">
+                <p>*承認待ちのため修正はできません。</p>
+            </div>
+            @else
             <button type="submit" class="btn btn-primary">修正</button>
+            @endif
         </div>
     </form>
 </div>

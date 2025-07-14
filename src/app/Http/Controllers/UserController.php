@@ -399,8 +399,10 @@ class UserController extends Controller
         }
 
         $hasPendingRequest = $this->checkPendingRequest($user, $attendance, $date);
+        $hasApprovedRequest = $this->checkApprovedRequest($user, $attendance, $date);
 
         $pendingAttendanceRequest = null;
+        $approvedAttendanceRequest = null;
 
         if ($hasPendingRequest) {
             if ($attendance) {
@@ -416,35 +418,52 @@ class UserController extends Controller
             }
         }
 
-        $displayData = $this->prepareDisplayData($attendance, $hasPendingRequest, $pendingAttendanceRequest);
+        if ($hasApprovedRequest) {
+            if ($attendance) {
+                $approvedAttendanceRequest = AttendanceRequestModel::where('attendance_id', $attendance->id)
+                    ->where('status', 'approved')
+                    ->first();
+            } else {
+                $targetDate = $date ?? now()->format('Y-m-d');
+                $approvedAttendanceRequest = AttendanceRequestModel::where('user_id', $user->id)
+                    ->where('target_date', $targetDate)
+                    ->where('status', 'approved')
+                    ->first();
+            }
+        }
+
+        $displayData = $this->prepareDisplayData($attendance, $hasPendingRequest, $pendingAttendanceRequest, $hasApprovedRequest, $approvedAttendanceRequest);
 
         return view('attendance.detail', compact(
             'attendance',
             'date',
             'hasPendingRequest',
+            'hasApprovedRequest',
             'pendingAttendanceRequest',
+            'approvedAttendanceRequest',
             'displayData'
         ));
     }
 
-    private function prepareDisplayData($attendance, $hasPendingRequest, $pendingAttendanceRequest)
+    private function prepareDisplayData($attendance, $hasPendingRequest, $pendingAttendanceRequest, $hasApprovedRequest, $approvedAttendanceRequest)
     {
         $data = [];
 
-        if ($hasPendingRequest && $pendingAttendanceRequest) {
-            $data['clockInTime'] = $pendingAttendanceRequest->clock_in_time ? $pendingAttendanceRequest->clock_in_time->format('H:i') : '';
-            $data['clockOutTime'] = $pendingAttendanceRequest->clock_out_time ? $pendingAttendanceRequest->clock_out_time->format('H:i') : '';
-        } elseif ($hasPendingRequest) {
-            $data['clockInTime'] = '';
-            $data['clockOutTime'] = '';
+        // 承認済みのリクエストがある場合はそれを優先、なければ保留中のリクエスト、最後に既存のデータ
+        $requestToUse = $approvedAttendanceRequest ?? $pendingAttendanceRequest;
+        $hasRequest = $hasApprovedRequest || $hasPendingRequest;
+
+        if ($hasRequest && $requestToUse) {
+            $data['clockInTime'] = $requestToUse->clock_in_time ? $requestToUse->clock_in_time->format('H:i') : '';
+            $data['clockOutTime'] = $requestToUse->clock_out_time ? $requestToUse->clock_out_time->format('H:i') : '';
         } else {
             $data['clockInTime'] = $attendance && $attendance->clock_in_time ? $attendance->clock_in_time->format('H:i') : '';
             $data['clockOutTime'] = $attendance && $attendance->clock_out_time ? $attendance->clock_out_time->format('H:i') : '';
         }
 
-        if ($hasPendingRequest && $pendingAttendanceRequest && $pendingAttendanceRequest->break_info) {
+        if ($hasRequest && $requestToUse && $requestToUse->break_info) {
             // 休憩1のデータを取得
-            $firstBreakInfo = $pendingAttendanceRequest->break_info[0] ?? null;
+            $firstBreakInfo = $requestToUse->break_info[0] ?? null;
             if ($firstBreakInfo) {
                 $startTimeStr = $firstBreakInfo['start_time'] ?? '';
                 $endTimeStr = $firstBreakInfo['end_time'] ?? '';
@@ -467,10 +486,6 @@ class UserController extends Controller
                 $data['break1EndTime'] = '';
                 $data['break1Notes'] = '';
             }
-        } elseif ($hasPendingRequest) {
-            $data['break1StartTime'] = '';
-            $data['break1EndTime'] = '';
-            $data['break1Notes'] = '';
         } elseif ($attendance && $attendance->breaks->count() > 0) {
             $firstBreak = $attendance->breaks->first();
             $data['break1StartTime'] = $firstBreak->start_time ? $firstBreak->start_time->format('H:i') : '';
@@ -482,9 +497,9 @@ class UserController extends Controller
             $data['break1Notes'] = '';
         }
 
-        if ($hasPendingRequest && $pendingAttendanceRequest && $pendingAttendanceRequest->break_info && count($pendingAttendanceRequest->break_info) > 1) {
+        if ($hasRequest && $requestToUse && $requestToUse->break_info && count($requestToUse->break_info) > 1) {
             // 休憩2のデータを取得
-            $secondBreakInfo = $pendingAttendanceRequest->break_info[1] ?? null;
+            $secondBreakInfo = $requestToUse->break_info[1] ?? null;
             if ($secondBreakInfo) {
                 $startTimeStr = $secondBreakInfo['start_time'] ?? '';
                 $endTimeStr = $secondBreakInfo['end_time'] ?? '';
@@ -507,10 +522,6 @@ class UserController extends Controller
                 $data['break2EndTime'] = '';
                 $data['break2Notes'] = '';
             }
-        } elseif ($hasPendingRequest) {
-            $data['break2StartTime'] = '';
-            $data['break2EndTime'] = '';
-            $data['break2Notes'] = '';
         } elseif ($attendance && $attendance->breaks->count() > 1) {
             $secondBreak = $attendance->breaks->get(1);
             $data['break2StartTime'] = $secondBreak->start_time ? $secondBreak->start_time->format('H:i') : '';
@@ -522,10 +533,8 @@ class UserController extends Controller
             $data['break2Notes'] = '';
         }
 
-        if ($hasPendingRequest && $pendingAttendanceRequest) {
-            $data['notes'] = $pendingAttendanceRequest->notes ?? '';
-        } elseif ($hasPendingRequest) {
-            $data['notes'] = '';
+        if ($hasRequest && $requestToUse) {
+            $data['notes'] = $requestToUse->notes ?? '';
         } else {
             $data['notes'] = $attendance ? $attendance->notes : '';
         }
@@ -545,6 +554,23 @@ class UserController extends Controller
             $hasAttendanceRequest = AttendanceRequestModel::where('user_id', $user->id)
                 ->where('target_date', $targetDate)
                 ->where('status', 'pending')
+                ->exists();
+            return $hasAttendanceRequest;
+        }
+    }
+
+    private function checkApprovedRequest($user, $attendance, $date)
+    {
+        if ($attendance) {
+            $hasAttendanceRequest = AttendanceRequestModel::where('attendance_id', $attendance->id)
+                ->where('status', 'approved')
+                ->exists();
+            return $hasAttendanceRequest;
+        } else {
+            $targetDate = $date ?? now()->format('Y-m-d');
+            $hasAttendanceRequest = AttendanceRequestModel::where('user_id', $user->id)
+                ->where('target_date', $targetDate)
+                ->where('status', 'approved')
                 ->exists();
             return $hasAttendanceRequest;
         }
@@ -592,13 +618,7 @@ class UserController extends Controller
                 $requestData['clock_out_time'] = $clockOutTime;
             }
 
-            // デバッグ用ログ
-            Log::info('Attendance update request data:', $requestData);
-
             $attendanceRequest = AttendanceRequestModel::create($requestData);
-
-            // デバッグ用ログ
-            Log::info('Attendance request created:', ['id' => $attendanceRequest->id]);
 
             $this->processBreakRequests($user, $attendance, $request);
 
@@ -612,19 +632,10 @@ class UserController extends Controller
 
     private function processBreakRequests($user, $attendance, $request)
     {
-        // デバッグログ
-        Log::info("processBreakRequests called", [
-            'break1_start_time' => $request->break1_start_time,
-            'break1_end_time' => $request->break1_end_time,
-            'break2_start_time' => $request->break2_start_time,
-            'break2_end_time' => $request->break2_end_time,
-        ]);
-
         // 休憩情報を配列として準備
         $breakInfo = [];
 
         if ($request->break1_start_time || $request->break1_end_time) {
-            Log::info("Processing break1 request");
             $breakInfo[] = [
                 'start_time' => $request->break1_start_time ?: null,
                 'end_time' => $request->break1_end_time ?: null,
@@ -632,7 +643,6 @@ class UserController extends Controller
         }
 
         if ($request->break2_start_time || $request->break2_end_time) {
-            Log::info("Processing break2 request");
             $breakInfo[] = [
                 'start_time' => $request->break2_start_time ?: null,
                 'end_time' => $request->break2_end_time ?: null,
@@ -647,7 +657,6 @@ class UserController extends Controller
 
             if ($existingAttendanceRequest) {
                 $existingAttendanceRequest->update(['break_info' => $breakInfo]);
-                Log::info("Updated existing attendance request with break info", ['id' => $existingAttendanceRequest->id]);
             }
         }
     }
