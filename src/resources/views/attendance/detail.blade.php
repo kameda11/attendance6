@@ -79,6 +79,12 @@
                     <tr>
                         <th>休憩</th>
                         <td>
+                            @php
+                            // デバッグ情報
+                            echo "<!-- Debug: hasPendingRequest = " . ($hasPendingRequest ? 'true' : 'false') . " -->";
+                            echo "<!-- Debug: break1StartTime = " . ($displayData['break1StartTime'] ?? 'null') . " -->";
+                            echo "<!-- Debug: break1EndTime = " . ($displayData['break1EndTime'] ?? 'null') . " -->";
+                            @endphp
                             @if($hasPendingRequest)
                             @if($displayData['break1StartTime'] || $displayData['break1EndTime'])
                             <div class="pending-break-item">
@@ -112,6 +118,12 @@
                     <tr>
                         <th>休憩2</th>
                         <td>
+                            @php
+                            // デバッグ情報
+                            echo "<!-- Debug: hasPendingRequest = " . ($hasPendingRequest ? 'true' : 'false') . " -->";
+                            echo "<!-- Debug: break2StartTime = " . ($displayData['break2StartTime'] ?? 'null') . " -->";
+                            echo "<!-- Debug: break2EndTime = " . ($displayData['break2EndTime'] ?? 'null') . " -->";
+                            @endphp
                             @if($hasPendingRequest)
                             @if($displayData['break2StartTime'] || $displayData['break2EndTime'])
                             <div class="pending-break-item">

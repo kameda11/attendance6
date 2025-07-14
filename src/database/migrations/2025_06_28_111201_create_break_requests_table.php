@@ -25,7 +25,7 @@ class CreateBreakRequestsTable extends Migration
 
             $table->timestamps();
 
-            $table->unique(['user_id', 'target_date', 'status'], 'unique_break_pending_request');
+            $table->unique(['user_id', 'target_date', 'status', 'break_id'], 'unique_break_pending_request');
         });
     }
     /**

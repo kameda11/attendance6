@@ -24,6 +24,8 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::put('/admin/attendance/update/{id}', [AdminController::class, 'attendanceUpdate'])->name('admin.attendance.update');
     Route::post('/admin/attendance/store', [AdminController::class, 'attendanceStore'])->name('admin.attendance.store');
     Route::get('/admin/requests/{id}', [AdminController::class, 'showApprovalPage'])->name('admin.attendance.request.approval');
+    Route::get('/admin/break-requests/{id}', [AdminController::class, 'showBreakRequestDetail'])->name('admin.break.request.detail');
+    Route::post('/admin/break-requests/{id}/approve', [AdminController::class, 'approveBreakRequest'])->name('admin.break.request.approve');
     Route::post('/admin/requests/{id}', [AdminController::class, 'approveRequest'])->name('admin.attendance.request.approve');
     Route::get('/admin/user/{userId}/attendances', [AdminController::class, 'userAttendanceList'])->name('admin.user.attendance.list');
     Route::get('/admin/user/{userId}/attendances/csv', [AdminController::class, 'userAttendanceCsv'])->name('admin.user.attendance.csv');

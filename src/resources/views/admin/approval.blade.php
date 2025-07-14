@@ -68,6 +68,15 @@
                                 <span class="time-end">{{ $firstBreak['end_time'] ?? '' }}</span>
                             </div>
                         </div>
+                        @elseif($breakRequests && $breakRequests->count() > 0)
+                        @php $firstBreakRequest = $breakRequests->first(); @endphp
+                        <div class="break-item">
+                            <div class="break-time">
+                                <span class="time-start">{{ $firstBreakRequest->start_time ? \Carbon\Carbon::parse($firstBreakRequest->start_time)->format('H:i') : '' }}</span>
+                                <span class="time-separator">～</span>
+                                <span class="time-end">{{ $firstBreakRequest->end_time ? \Carbon\Carbon::parse($firstBreakRequest->end_time)->format('H:i') : '' }}</span>
+                            </div>
+                        </div>
                         @elseif($request->attendance && $request->attendance->breaks->count() > 0)
                         @php $firstBreak = $request->attendance->breaks->first(); @endphp
                         <div class="break-item">
@@ -76,7 +85,6 @@
                                 <span class="time-separator">～</span>
                                 <span class="time-end">{{ $firstBreak->end_time ? \Carbon\Carbon::parse($firstBreak->end_time)->format('H:i') : '' }}</span>
                             </div>
-
                         </div>
                         @else
                         <span class="no-data"></span>
@@ -95,6 +103,15 @@
                                 <span class="time-end">{{ $secondBreak['end_time'] ?? '' }}</span>
                             </div>
                         </div>
+                        @elseif($breakRequests && $breakRequests->count() > 1)
+                        @php $secondBreakRequest = $breakRequests->get(1); @endphp
+                        <div class="break-item">
+                            <div class="break-time">
+                                <span class="time-start">{{ $secondBreakRequest->start_time ? \Carbon\Carbon::parse($secondBreakRequest->start_time)->format('H:i') : '' }}</span>
+                                <span class="time-separator">～</span>
+                                <span class="time-end">{{ $secondBreakRequest->end_time ? \Carbon\Carbon::parse($secondBreakRequest->end_time)->format('H:i') : '' }}</span>
+                            </div>
+                        </div>
                         @elseif($request->attendance && $request->attendance->breaks->count() > 1)
                         @php $secondBreak = $request->attendance->breaks->get(1); @endphp
                         <div class="break-item">
@@ -103,7 +120,6 @@
                                 <span class="time-separator">～</span>
                                 <span class="time-end">{{ $secondBreak->end_time ? \Carbon\Carbon::parse($secondBreak->end_time)->format('H:i') : '' }}</span>
                             </div>
-
                         </div>
                         @else
                         <span class="no-data"></span>
@@ -137,6 +153,5 @@
         @endif
     </div>
 </div>
-
 
 @endsection

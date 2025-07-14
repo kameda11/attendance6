@@ -76,81 +76,56 @@
                     <tr>
                         <th>休憩</th>
                         <td>
-                            @if($breakRequests && $breakRequests->count() > 0)
-                            @php $firstBreakRequest = $breakRequests->first(); @endphp
-                            <div class="break-item">
-                                <span class="break-time">
-                                    {{ $firstBreakRequest->start_time ? $firstBreakRequest->start_time->format('H:i') : '' }} ~
-                                    {{ $firstBreakRequest->end_time ? $firstBreakRequest->end_time->format('H:i') : '' }}
-                                </span>
-
-                            </div>
-                            @elseif($attendance && $attendance->breaks->count() > 0)
-                            @php $firstBreak = $attendance->breaks->first(); @endphp
-                            <div class="break-item">
-                                <span class="break-time">
-                                    {{ $firstBreak->start_time ? $firstBreak->start_time->format('H:i') : '' }} ~
-                                    {{ $firstBreak->end_time ? $firstBreak->end_time->format('H:i') : '' }}
-                                </span>
-
-                            </div>
-                            @else
+                            @php
+                            // デバッグ情報
+                            echo "<!-- Debug: breakRequests count = " . ($breakRequests ? $breakRequests->count() : 'null') . " -->";
+                            echo "<!-- Debug: attendance breaks count = " . ($attendance && $attendance->breaks ? $attendance->breaks->count() : 'null') . " -->";
+                            @endphp
                             <div class="time-inputs">
                                 <div class="time-input">
-                                    <input type="text" name="break1_start_time" maxlength="5" value="{{ old('break1_start_time') }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break1_start_time" maxlength="5" value="{{ old('break1_start_time', $attendance && $attendance->breaks->count() > 0 ? $attendance->breaks->first()->start_time->format('H:i') : '') }}" inputmode="numeric" autocomplete="off">
                                     @error('break1_start_time')
                                     <span class="error-message">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <label>～</label>
                                 <div class="time-input">
-                                    <input type="text" name="break1_end_time" maxlength="5" value="{{ old('break1_end_time') }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break1_end_time" maxlength="5" value="{{ old('break1_end_time', $attendance && $attendance->breaks->count() > 0 ? $attendance->breaks->first()->end_time->format('H:i') : '') }}" inputmode="numeric" autocomplete="off">
                                     @error('break1_end_time')
                                     <span class="error-message">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </div>
-                            @endif
                         </td>
                     </tr>
                     <tr>
                         <th>休憩2</th>
                         <td>
-                            @if($breakRequests && $breakRequests->count() > 1)
-                            @php $secondBreakRequest = $breakRequests->get(1); @endphp
-                            <div class="break-item">
-                                <span class="break-time">
-                                    {{ $secondBreakRequest->start_time ? $secondBreakRequest->start_time->format('H:i') : '' }} ~
-                                    {{ $secondBreakRequest->end_time ? $secondBreakRequest->end_time->format('H:i') : '' }}
-                                </span>
-
-                            </div>
-                            @elseif($attendance && $attendance->breaks->count() > 1)
-                            @php $secondBreak = $attendance->breaks->get(1); @endphp
-                            <div class="break-item">
-                                <span class="break-time">
-                                    {{ $secondBreak->start_time ? $secondBreak->start_time->format('H:i') : '' }} ~
-                                    {{ $secondBreak->end_time ? $secondBreak->end_time->format('H:i') : '' }}
-                                </span>
-
-                            </div>
-                            @else
+                            @php
+                            // デバッグ情報
+                            echo "<!-- Debug: breakRequests count = " . ($breakRequests ? $breakRequests->count() : 'null') . " -->";
+                            echo "<!-- Debug: attendance breaks count = " . ($attendance && $attendance->breaks ? $attendance->breaks->count() : 'null') . " -->";
+                            if ($attendance && $attendance->breaks) {
+                            $attendance->breaks->each(function($break, $index) {
+                            echo "<!-- Debug: Break " . ($index + 1) . " = " . $break->start_time->format('H:i') . " - " . $break->end_time->format('H:i') . " -->";
+                            });
+                            }
+                            @endphp
                             <div class="time-inputs">
                                 <div class="time-input">
-                                    <input type="text" name="break2_start_time" maxlength="5" value="{{ old('break2_start_time') }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break2_start_time" maxlength="5" value="{{ old('break2_start_time', $attendance && $attendance->breaks->count() > 1 ? $attendance->breaks->get(1)->start_time->format('H:i') : '') }}" inputmode="numeric" autocomplete="off">
                                     @error('break2_start_time')
                                     <span class="error-message">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <label>～</label>
                                 <div class="time-input">
-                                    <input type="text" name="break2_end_time" maxlength="5" value="{{ old('break2_end_time') }}" inputmode="numeric" autocomplete="off">
+                                    <input type="text" name="break2_end_time" maxlength="5" value="{{ old('break2_end_time', $attendance && $attendance->breaks->count() > 1 ? $attendance->breaks->get(1)->end_time->format('H:i') : '') }}" inputmode="numeric" autocomplete="off">
                                     @error('break2_end_time')
                                     <span class="error-message">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </div>
-                            @endif
                         </td>
                     </tr>
                     <tr>
