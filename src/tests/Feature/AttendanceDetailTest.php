@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Carbon;
 use App\Models\User;
 use Tests\TestCase;
 
@@ -36,7 +35,7 @@ class AttendanceDetailTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $selectedDate = Carbon::create(2025, 7, 12);
+        $selectedDate = now();
         $attendance = $user->attendances()->create([
             'clock_in_time' => $selectedDate->copy()->setTime(9, 0),
             'clock_out_time' => $selectedDate->copy()->setTime(18, 0),
@@ -47,8 +46,8 @@ class AttendanceDetailTest extends TestCase
         $response = $this->get("/attendance/detail/{$attendance->id}");
         $response->assertStatus(200);
 
-        $response->assertSee('2025年');
-        $response->assertSee('7月13日');
+        $response->assertSee($selectedDate->format('Y') . '年');
+        $response->assertSee($selectedDate->format('n') . '月' . $selectedDate->format('j') . '日');
     }
 
     public function test_clock_in_out_times_are_displayed_correctly()

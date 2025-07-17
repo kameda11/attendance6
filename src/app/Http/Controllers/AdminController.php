@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use App\Models\Attendance;
 use App\Models\User;
 use App\Models\AttendanceRequest as AttendanceRequestModel;
@@ -372,18 +371,15 @@ class AdminController extends Controller
 
     public function showApprovalPage($id)
     {
-        // まずAttendanceRequestを探す
         $request = AttendanceRequestModel::with('user')->find($id);
 
         if ($request) {
-            // AttendanceRequestの場合
             if ($request->attendance_id) {
                 $attendance = Attendance::with('breaks')->find($request->attendance_id);
             } else {
                 $attendance = null;
             }
 
-            // 同じ日付の休憩リクエストも取得
             $breakRequests = BreakRequest::where('user_id', $request->user_id)
                 ->where('target_date', $request->target_date)
                 ->where('status', 'pending')
@@ -392,10 +388,8 @@ class AdminController extends Controller
 
             return view('admin.approval', compact('request', 'attendance', 'breakRequests'));
         } else {
-            // BreakRequestの場合
             $request = BreakRequest::with('user')->findOrFail($id);
 
-            // 関連するAttendanceを取得
             $attendance = null;
             if ($request->break_id) {
                 $break = Breaktime::with('attendance')->find($request->break_id);
@@ -403,7 +397,6 @@ class AdminController extends Controller
                     $attendance = $break->attendance;
                 }
             } else {
-                // break_idがnullの場合は、target_dateからAttendanceを探す
                 $attendance = Attendance::where('user_id', $request->user_id)
                     ->whereDate('created_at', $request->target_date)
                     ->first();
@@ -419,7 +412,6 @@ class AdminController extends Controller
     {
         $request = BreakRequest::with('user')->findOrFail($id);
 
-        // 関連するAttendanceを取得
         $attendance = null;
         if ($request->break_id) {
             $break = Breaktime::with('attendance')->find($request->break_id);
@@ -427,7 +419,6 @@ class AdminController extends Controller
                 $attendance = $break->attendance;
             }
         } else {
-            // break_idがnullの場合は、target_dateからAttendanceを探す
             $attendance = Attendance::where('user_id', $request->user_id)
                 ->whereDate('created_at', $request->target_date)
                 ->first();
@@ -438,11 +429,9 @@ class AdminController extends Controller
 
     public function approveRequest(Request $request, $id)
     {
-        // まずAttendanceRequestを探す
         $attendanceRequest = AttendanceRequestModel::find($id);
 
         if ($attendanceRequest) {
-            // AttendanceRequestの場合
             if ($attendanceRequest->status !== 'pending') {
                 return back()->withErrors(['general' => 'この申請は既に処理済みです']);
             }
@@ -451,7 +440,6 @@ class AdminController extends Controller
                 'status' => 'approved',
             ]);
 
-            // 同じ日付の休憩リクエストも承認
             $breakRequests = BreakRequest::where('user_id', $attendanceRequest->user_id)
                 ->where('target_date', $attendanceRequest->target_date)
                 ->where('status', 'pending')
@@ -474,7 +462,6 @@ class AdminController extends Controller
 
                 $attendance->update($updateData);
 
-                // 休憩時間も更新
                 $this->updateBreakTimesFromRequests($attendance, $breakRequests);
             } else {
                 $createData = [
@@ -493,7 +480,6 @@ class AdminController extends Controller
                 $this->processBreakRequestsAfterApproval($attendance, $attendanceRequest);
             }
         } else {
-            // BreakRequestの場合
             $breakRequest = BreakRequest::findOrFail($id);
 
             if ($breakRequest->status !== 'pending') {
@@ -504,7 +490,6 @@ class AdminController extends Controller
                 'status' => 'approved',
             ]);
 
-            // 関連するAttendanceを取得して更新
             $attendance = null;
             if ($breakRequest->break_id) {
                 $break = Breaktime::find($breakRequest->break_id);
@@ -518,7 +503,6 @@ class AdminController extends Controller
             }
 
             if ($attendance && $breakRequest->request_type === 'update') {
-                // 既存の休憩を更新
                 if ($breakRequest->break_id) {
                     $break = Breaktime::find($breakRequest->break_id);
                     if ($break) {
@@ -529,7 +513,6 @@ class AdminController extends Controller
                     }
                 }
             } elseif ($attendance && $breakRequest->request_type === 'create') {
-                // 新しい休憩を作成
                 $attendance->breaks()->create([
                     'start_time' => $breakRequest->start_time,
                     'end_time' => $breakRequest->end_time,
@@ -1002,7 +985,6 @@ class AdminController extends Controller
             ]);
 
             if ($breakRequest->break) {
-                // 既存の休憩データを更新
                 $updateData = [];
 
                 if ($breakRequest->start_time) {
@@ -1014,7 +996,6 @@ class AdminController extends Controller
 
                 $breakRequest->break->update($updateData);
             } else {
-                // 新規作成の場合は新しい休憩データを作成
                 $createData = [
                     'attendance_id' => $attendance->id,
                 ];
@@ -1028,7 +1009,6 @@ class AdminController extends Controller
 
                 $newBreak = Breaktime::create($createData);
 
-                // 作成した休憩データのIDをBreakRequestに設定
                 $breakRequest->update(['break_id' => $newBreak->id]);
             }
         }
@@ -1038,7 +1018,6 @@ class AdminController extends Controller
     {
         foreach ($breakRequests as $breakRequest) {
             if ($breakRequest->break) {
-                // 既存の休憩データを更新
                 $updateData = [];
 
                 if ($breakRequest->start_time) {
@@ -1050,7 +1029,6 @@ class AdminController extends Controller
 
                 $breakRequest->break->update($updateData);
             } else {
-                // 新規作成の場合は新しい休憩データを作成
                 $createData = [
                     'attendance_id' => $attendance->id,
                 ];
@@ -1064,7 +1042,6 @@ class AdminController extends Controller
 
                 $newBreak = Breaktime::create($createData);
 
-                // 作成した休憩データのIDをBreakRequestに設定
                 $breakRequest->update(['break_id' => $newBreak->id]);
             }
         }
@@ -1082,14 +1059,12 @@ class AdminController extends Controller
             'notes' => ''
         ];
 
-        // 承認済みリクエストを優先的にチェック
         $approvedRequest = $this->checkApprovedRequest($attendance, $attendanceRequest);
         if ($approvedRequest) {
             $displayData['clockInTime'] = $approvedRequest->clock_in_time ? $approvedRequest->clock_in_time->format('H:i') : '';
             $displayData['clockOutTime'] = $approvedRequest->clock_out_time ? $approvedRequest->clock_out_time->format('H:i') : '';
             $displayData['notes'] = $approvedRequest->notes ?? '';
 
-            // 承認済みリクエストの休憩情報を取得
             if ($approvedRequest->break_info) {
                 $breakInfo = $approvedRequest->break_info;
                 if (isset($breakInfo[0])) {
@@ -1104,13 +1079,11 @@ class AdminController extends Controller
             return $displayData;
         }
 
-        // 保留中のリクエストをチェック
         if ($attendanceRequest) {
             $displayData['clockInTime'] = $attendanceRequest->clock_in_time ? $attendanceRequest->clock_in_time->format('H:i') : '';
             $displayData['clockOutTime'] = $attendanceRequest->clock_out_time ? $attendanceRequest->clock_out_time->format('H:i') : '';
             $displayData['notes'] = $attendanceRequest->notes ?? '';
 
-            // 保留中リクエストの休憩情報を取得
             if ($attendanceRequest->break_info) {
                 $breakInfo = $attendanceRequest->break_info;
                 if (isset($breakInfo[0])) {
@@ -1125,13 +1098,11 @@ class AdminController extends Controller
             return $displayData;
         }
 
-        // 既存の勤怠データを表示
         if ($attendance) {
             $displayData['clockInTime'] = $attendance->clock_in_time ? $attendance->clock_in_time->format('H:i') : '';
             $displayData['clockOutTime'] = $attendance->clock_out_time ? $attendance->clock_out_time->format('H:i') : '';
             $displayData['notes'] = $attendance->notes ?? '';
 
-            // 既存の休憩データを取得
             if ($attendance->breaks && $attendance->breaks->count() > 0) {
                 $firstBreak = $attendance->breaks->first();
                 $displayData['break1StartTime'] = $firstBreak->start_time ? $firstBreak->start_time->format('H:i') : '';

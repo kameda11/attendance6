@@ -174,9 +174,13 @@ class AdminAttendanceUpdateTest extends TestCase
             'email' => 'tanaka@example.com'
         ]);
 
+        $targetDate = now()->format('Y-m-d');
+        $clockInTime = now()->setTime(9, 0);
+        $clockOutTime = now()->setTime(18, 0);
+
         $attendance = $user->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-07-13 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-07-13 18:00:00'),
+            'clock_in_time' => $clockInTime,
+            'clock_out_time' => $clockOutTime,
             'status' => 'completed',
             'notes' => '元の備考',
         ]);
@@ -184,11 +188,11 @@ class AdminAttendanceUpdateTest extends TestCase
         $request = AttendanceRequest::create([
             'user_id' => $user->id,
             'attendance_id' => $attendance->id,
-            'target_date' => '2025-07-13',
+            'target_date' => $targetDate,
             'request_type' => 'update',
             'status' => 'pending',
-            'clock_in_time' => '2025-07-13 08:30:00',
-            'clock_out_time' => '2025-07-13 17:30:00',
+            'clock_in_time' => $targetDate . ' 08:30:00',
+            'clock_out_time' => $targetDate . ' 17:30:00',
             'notes' => '修正申請の備考',
         ]);
 
@@ -199,9 +203,9 @@ class AdminAttendanceUpdateTest extends TestCase
 
         $response->assertSee('田中太郎');
         $response->assertSee('修正申請の備考');
-        $response->assertSee('2025');
-        $response->assertSee('7');
-        $response->assertSee('13');
+        $response->assertSee(now()->format('Y'));
+        $response->assertSee(now()->format('n'));
+        $response->assertSee(now()->format('j'));
     }
 
 
@@ -213,9 +217,13 @@ class AdminAttendanceUpdateTest extends TestCase
             'email' => 'tanaka@example.com'
         ]);
 
+        $targetDate = now()->format('Y-m-d');
+        $clockInTime = now()->setTime(9, 0);
+        $clockOutTime = now()->setTime(18, 0);
+
         $attendance = $user->attendances()->create([
-            'clock_in_time' => Carbon::parse('2025-07-13 09:00:00'),
-            'clock_out_time' => Carbon::parse('2025-07-13 18:00:00'),
+            'clock_in_time' => $clockInTime,
+            'clock_out_time' => $clockOutTime,
             'status' => 'completed',
             'notes' => '元の備考',
         ]);
@@ -223,11 +231,11 @@ class AdminAttendanceUpdateTest extends TestCase
         $request = AttendanceRequest::create([
             'user_id' => $user->id,
             'attendance_id' => $attendance->id,
-            'target_date' => '2025-07-13',
+            'target_date' => $targetDate,
             'request_type' => 'update',
             'status' => 'pending',
-            'clock_in_time' => '2025-07-13 08:30:00',
-            'clock_out_time' => '2025-07-13 17:30:00',
+            'clock_in_time' => $targetDate . ' 08:30:00',
+            'clock_out_time' => $targetDate . ' 17:30:00',
             'notes' => '修正申請の備考',
         ]);
 

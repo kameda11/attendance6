@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Attendance;
-use App\Models\BreakRequest;
 use App\Models\AttendanceRequest as AttendanceRequestModel;
 use App\Http\Requests\AttendanceFormRequest;
 
@@ -22,7 +20,6 @@ class UserController extends Controller
             ->with('breaks')
             ->whereDate('created_at', today())
             ->first();
-
         $recentAttendances = $user->attendances()
             ->with('breaks')
             ->orderBy('created_at', 'desc')
@@ -37,17 +34,14 @@ class UserController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-
         $existingAttendance = $user->attendances()
             ->whereDate('created_at', today())
             ->first();
-
         if ($existingAttendance) {
             return response()->json([
                 'success' => false
             ]);
         }
-
         $attendance = $user->attendances()->create([
             'clock_in_time' => now(),
             'status' => 'working',
@@ -64,24 +58,20 @@ class UserController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-
         $attendance = $user->attendances()
             ->whereDate('created_at', today())
             ->where('status', '!=', 'completed')
             ->latest()
             ->first();
-
         if (!$attendance) {
             return response()->json([
                 'success' => false
             ]);
         }
-
         $attendance->update([
             'clock_out_time' => now(),
             'status' => 'completed',
         ]);
-
         return response()->json([
             'success' => true,
             'attendance' => $attendance
@@ -93,29 +83,24 @@ class UserController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-
         $attendance = $user->attendances()
             ->whereDate('created_at', today())
             ->where('status', '!=', 'completed')
             ->latest()
             ->first();
-
         if (!$attendance) {
             return response()->json([
                 'success' => false
             ]);
         }
-
         if ($attendance->status !== 'working') {
             return response()->json([
                 'success' => false
             ]);
         }
-
         $break = $attendance->breaks()->create([
             'start_time' => now(),
         ]);
-
         $attendance->update([
             'status' => 'break',
         ]);
@@ -132,20 +117,17 @@ class UserController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-
         $attendance = $user->attendances()
             ->with('breaks')
             ->whereDate('created_at', today())
             ->where('status', '!=', 'completed')
             ->latest()
             ->first();
-
         if (!$attendance) {
             return response()->json([
                 'success' => false
             ]);
         }
-
         if ($attendance->status !== 'break') {
             return response()->json([
                 'success' => false
@@ -156,13 +138,11 @@ class UserController extends Controller
             ->whereNull('end_time')
             ->latest()
             ->first();
-
         if ($activeBreak) {
             $activeBreak->update([
                 'end_time' => now(),
             ]);
         }
-
         $attendance->update([
             'status' => 'working',
         ]);
@@ -449,7 +429,6 @@ class UserController extends Controller
     {
         $data = [];
 
-        // 承認済みのリクエストがある場合はそれを優先、なければ保留中のリクエスト、最後に既存のデータ
         $requestToUse = $approvedAttendanceRequest ?? $pendingAttendanceRequest;
         $hasRequest = $hasApprovedRequest || $hasPendingRequest;
 
@@ -462,7 +441,6 @@ class UserController extends Controller
         }
 
         if ($hasRequest && $requestToUse && $requestToUse->break_info) {
-            // 休憩1のデータを取得
             $firstBreakInfo = $requestToUse->break_info[0] ?? null;
             if ($firstBreakInfo) {
                 $startTimeStr = $firstBreakInfo['start_time'] ?? '';
@@ -498,7 +476,6 @@ class UserController extends Controller
         }
 
         if ($hasRequest && $requestToUse && $requestToUse->break_info && count($requestToUse->break_info) > 1) {
-            // 休憩2のデータを取得
             $secondBreakInfo = $requestToUse->break_info[1] ?? null;
             if ($secondBreakInfo) {
                 $startTimeStr = $secondBreakInfo['start_time'] ?? '';
@@ -624,15 +601,12 @@ class UserController extends Controller
 
             return redirect()->route('user.attendance.list');
         } catch (\Exception $e) {
-            // エラーログ
-            Log::error('Attendance update error:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors(['general' => 'エラーが発生しました: ' . $e->getMessage()]);
         }
     }
 
     private function processBreakRequests($user, $attendance, $request)
     {
-        // 休憩情報を配列として準備
         $breakInfo = [];
 
         if ($request->break1_start_time || $request->break1_end_time) {
@@ -641,15 +615,12 @@ class UserController extends Controller
                 'end_time' => $request->break1_end_time ?: null,
             ];
         }
-
         if ($request->break2_start_time || $request->break2_end_time) {
             $breakInfo[] = [
                 'start_time' => $request->break2_start_time ?: null,
                 'end_time' => $request->break2_end_time ?: null,
             ];
         }
-
-        // 既存のAttendanceRequestを更新してbreak_infoを追加
         if (!empty($breakInfo)) {
             $existingAttendanceRequest = AttendanceRequestModel::where('attendance_id', $attendance->id)
                 ->where('status', 'pending')
@@ -670,7 +641,6 @@ class UserController extends Controller
             $existingAttendance = $user->attendances()
                 ->whereDate('created_at', $request->date)
                 ->first();
-
             if ($existingAttendance) {
                 return back()->withErrors(['date' => '指定された日付には既に勤怠記録が存在します']);
             }
@@ -679,7 +649,6 @@ class UserController extends Controller
                 ->where('target_date', $request->date)
                 ->where('status', 'pending')
                 ->first();
-
             if ($existingRequest) {
                 return back()->withErrors(['date' => '既に保留中の申請があります']);
             }
