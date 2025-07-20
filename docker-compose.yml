@@ -14,7 +14,6 @@ services:
         user: "1000:1000"
         volumes:
             - ./src:/var/www/
-            - ./.env:/var/www/.env
 
     mysql:
         image: mysql:8.0.26
