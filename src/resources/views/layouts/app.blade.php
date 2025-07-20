@@ -16,7 +16,7 @@
     <header class="header">
         <div class="header__inner">
             <div class="header-utilities">
-                <a class="header__logo">
+                <a class="header__logo" href="/attendance">
                     <img src="{{ asset('storage/logo.svg') }}" alt="coachtech">
                 </a>
                 <nav>
